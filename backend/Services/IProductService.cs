@@ -12,6 +12,7 @@ namespace backend.Services
         string? search, string? category, string? condition, string? sort, int page, int pageSize);
         Task<List<object>> GetRecentItemsAsync(int count);
         Task<List<object>> SuggestItemsAsync(string query);
+        Task<List<object>> GetItemsBySellerAsync(int sellerId);
 
         Task<Product?> UpdateAsync(int id, UpdateProductDto dto);
         Task<bool> SoftDeleteAsync(int id);

@@ -92,6 +92,13 @@ namespace backend.Controllers
             return Ok(items);
         }
 
+        [HttpGet("items/seller/{sellerId}")]
+        public async Task<IActionResult> GetItemsBySeller(int sellerId)
+        {
+            var items = await _productService.GetItemsBySellerAsync(sellerId);
+            return Ok(items);
+        }
+
         [HttpGet("item/{id}")]
         public async Task<IActionResult> GetItem(int id)
         {
@@ -107,9 +114,17 @@ namespace backend.Controllers
                 item.Description,
                 item.Price,
                 item.Condition,
+                item.SellerId,
                 Images = item.Images.Select(img => new { img.downloadUrl }).ToList(),
                 Category = item.Category.Name,
-                SubCategory = item.SubCategory.Name
+                SubCategory = item.SubCategory.Name,
+                Seller = item.Seller != null ? new
+                {
+                    item.Seller.Id,
+                    item.Seller.Username,
+                    item.Seller.FullName,
+                    item.Seller.Email
+                } : null
             });
         }
 

@@ -28,6 +28,7 @@ namespace backend.Services
                 .Include(p => p.Images)
                 .Include(p => p.Category)
                 .Include(p => p.SubCategory)
+                .Include(p => p.Seller)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
         
@@ -172,6 +173,30 @@ namespace backend.Services
                 .OrderBy(i => i.Name)
                 .Take(5)
                 .Select(i => new { i.Id, i.Name })
+                .Cast<object>()
+                .ToListAsync();
+        }
+
+        public async Task<List<object>> GetItemsBySellerAsync(int sellerId)
+        {
+            return await _db.Products
+                .Include(i => i.Images)
+                .Include(i => i.SubCategory).ThenInclude(sc => sc.Category)
+                .Where(i => !i.IsDeleted && i.SellerId == sellerId)
+                .OrderByDescending(i => i.CreatedAt)
+                .Select(i => new
+                {
+                    i.Id,
+                    i.Name,
+                    i.Description,
+                    i.Price,
+                    i.Brand,
+                    i.Condition,
+                    i.SellerId,
+                    Images = i.Images.Select(img => new { img.downloadUrl }).ToList(),
+                    Category = i.SubCategory.Category.Name,
+                    SubCategory = i.SubCategory.Name
+                })
                 .Cast<object>()
                 .ToListAsync();
         }

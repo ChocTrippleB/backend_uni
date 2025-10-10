@@ -24,6 +24,9 @@ namespace backend.Services
                 .Include(c => c.Items)
                 .ThenInclude(i => i.Product)
                 .ThenInclude(p => p.Images) // make sure images are loaded
+                .Include(c => c.Items)
+                .ThenInclude(i => i.Product)
+                .ThenInclude(p => p.Seller) // include seller info
                 .FirstOrDefaultAsync(c => c.UserId == userId)
                 ?? new Cart { UserId = userId };
 

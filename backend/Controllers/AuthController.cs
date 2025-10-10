@@ -141,6 +141,29 @@ public class AuthController : ControllerBase
         });
     }
 
+    [HttpGet("user/{id}")]
+    public async Task<IActionResult> GetUserById(int id)
+    {
+        var user = await _context.Users
+            .Include(u => u.Role)
+            .Include(u => u.Followed)
+            .Include(u => u.Followers)
+            .Include(u => u.Items)
+            .FirstOrDefaultAsync(u => u.Id == id);
+
+        if (user == null) return NotFound("User not found");
+
+        return Ok(new
+        {
+            user.Id,
+            user.Username,
+            user.FullName,
+            FollowersCount = user.Followers?.Count ?? 0,
+            FollowingCount = user.Followed?.Count ?? 0,
+            ListingsCount = user.Items?.Count ?? 0
+        });
+    }
+
 
     private async Task SendEmailConfirmationAsync(string toEmail, string confirmationLink)
     {
