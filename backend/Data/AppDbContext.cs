@@ -21,6 +21,8 @@ namespace backend.Data
         public DbSet<SubCategory> SubCategories { get; set; }
         public DbSet<Follower> Followers { get; set; }
         public DbSet<UserFollower> UserFollowers { get; set; }
+        public DbSet<Order> Orders { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -77,6 +79,25 @@ namespace backend.Data
                 .HasOne(uf => uf.Followed)
                 .WithMany(u => u.Followers)
                 .HasForeignKey(uf => uf.FollowedId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Configure Order relationships
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Buyer)
+                .WithMany(u => u.PurchaseOrders)
+                .HasForeignKey(o => o.BuyerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Seller)
+                .WithMany(u => u.SaleOrders)
+                .HasForeignKey(o => o.SellerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Product)
+                .WithMany()
+                .HasForeignKey(o => o.ProductId)
                 .OnDelete(DeleteBehavior.NoAction);
         }
     }
