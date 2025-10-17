@@ -154,12 +154,13 @@ namespace backend.Services
             product.IsSold = true;
             product.SoldAt = DateTime.UtcNow;
 
+            // TODO: Re-enable bank details check after implementing bank management
             // Check if seller has added bank details
-            if (string.IsNullOrEmpty(order.Seller.PaystackRecipientCode))
-            {
-                await _context.SaveChangesAsync();
-                return (false, "Please add your bank details in Account Settings to receive payouts.");
-            }
+            //if (string.IsNullOrEmpty(order.Seller.PaystackRecipientCode))
+            //{
+            //    await _context.SaveChangesAsync();
+            //    return (false, "Please add your bank details in Account Settings to receive payouts.");
+            //}
 
             // Calculate next payout date (Mon/Wed/Fri schedule)
             var scheduledDate = GetNextPayoutDate();
@@ -169,7 +170,7 @@ namespace backend.Services
             {
                 OrderId = order.Id,
                 SellerId = sellerId,
-                SellerRecipientCode = order.Seller.PaystackRecipientCode,
+                SellerRecipientCode = order.Seller.PaystackRecipientCode ?? "TEMP_TEST_RECIPIENT", // TODO: Remove after bank management implemented
                 Amount = order.Amount,
                 QueuedAt = DateTime.UtcNow,
                 ScheduledPayoutDate = scheduledDate,

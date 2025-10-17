@@ -82,6 +82,7 @@ namespace backend
             builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddScoped<ICartItemService, CartItemService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<IPayoutService, PayoutService>();
             builder.Services.AddHttpClient<IPaystackService, PaystackService>();
 
 
