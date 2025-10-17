@@ -22,6 +22,7 @@ namespace backend.Data
         public DbSet<Follower> Followers { get; set; }
         public DbSet<UserFollower> UserFollowers { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<PayoutQueue> PayoutQueue { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -99,6 +100,26 @@ namespace backend.Data
                 .WithMany()
                 .HasForeignKey(o => o.ProductId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            // Configure PayoutQueue relationships
+            modelBuilder.Entity<PayoutQueue>()
+                .HasOne(p => p.Order)
+                .WithMany()
+                .HasForeignKey(p => p.OrderId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<PayoutQueue>()
+                .HasOne(p => p.Seller)
+                .WithMany()
+                .HasForeignKey(p => p.SellerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Add indexes for better query performance
+            modelBuilder.Entity<PayoutQueue>()
+                .HasIndex(p => new { p.Status, p.ScheduledPayoutDate });
+
+            modelBuilder.Entity<Order>()
+                .HasIndex(o => o.Status);
         }
     }
 }

@@ -98,7 +98,7 @@ namespace backend.Services
             {
                 var requestBody = new
                 {
-                    type = "nuban", // Nigerian bank account type - adjust for your region
+                    type = "bank_account", // For South African bank accounts
                     name = accountName,
                     account_number = accountNumber,
                     bank_code = bankCode,

@@ -4,12 +4,13 @@ namespace backend.Model
 {
     public enum OrderStatus
     {
-        Pending,
-        Paid,
-        AwaitingRelease,
-        Released,
-        Refunded,
-        Cancelled
+        Pending = 0,           // Order created, awaiting payment
+        Paid = 1,              // Payment received (transitional state)
+        AwaitingRelease = 2,   // Paid, waiting for buyer's 6-digit code
+        AwaitingPayout = 3,    // Code verified, queued for batch payout
+        Completed = 4,         // Payout processed, order complete
+        Refunded = 5,          // Payment refunded to buyer
+        Cancelled = 6          // Order cancelled
     }
 
     public class Order

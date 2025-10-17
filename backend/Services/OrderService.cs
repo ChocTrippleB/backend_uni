@@ -80,7 +80,7 @@ namespace backend.Services
                 .Include(o => o.Product)
                     .ThenInclude(p => p.Images)
                 .Where(o => o.SellerId == sellerId &&
-                           (o.Status == OrderStatus.AwaitingRelease || o.Status == OrderStatus.Released))
+                           (o.Status == OrderStatus.AwaitingRelease || o.Status == OrderStatus.AwaitingPayout || o.Status == OrderStatus.Completed))
                 .OrderByDescending(o => o.CreatedAt)
                 .ToListAsync();
 
@@ -145,8 +145,8 @@ namespace backend.Services
                 return (false, $"Invalid release code. Attempts remaining: {5 - order.FailedReleaseAttempts}");
             }
 
-            // Release code is correct - update order status
-            order.Status = OrderStatus.Released;
+            // Release code is correct - update order status to AwaitingPayout
+            order.Status = OrderStatus.AwaitingPayout;
             order.ReleasedAt = DateTime.UtcNow;
 
             // Mark product as sold
@@ -154,19 +154,32 @@ namespace backend.Services
             product.IsSold = true;
             product.SoldAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
-
-            // Initiate payout to seller (if Paystack recipient code exists)
-            if (!string.IsNullOrEmpty(order.Seller.PaystackRecipientCode))
+            // Check if seller has added bank details
+            if (string.IsNullOrEmpty(order.Seller.PaystackRecipientCode))
             {
-                var transferReference = $"PAYOUT-{order.Id}-{DateTime.UtcNow.Ticks}";
-                await _paystackService.InitiateTransferAsync(
-                    order.Seller.PaystackRecipientCode,
-                    order.Amount,
-                    transferReference);
+                await _context.SaveChangesAsync();
+                return (false, "Please add your bank details in Account Settings to receive payouts.");
             }
 
-            return (true, "Payment released successfully!");
+            // Calculate next payout date (Mon/Wed/Fri schedule)
+            var scheduledDate = GetNextPayoutDate();
+
+            // Add to payout queue instead of immediate transfer
+            var payoutQueue = new PayoutQueue
+            {
+                OrderId = order.Id,
+                SellerId = sellerId,
+                SellerRecipientCode = order.Seller.PaystackRecipientCode,
+                Amount = order.Amount,
+                QueuedAt = DateTime.UtcNow,
+                ScheduledPayoutDate = scheduledDate,
+                Status = PayoutStatus.Pending
+            };
+
+            _context.PayoutQueue.Add(payoutQueue);
+            await _context.SaveChangesAsync();
+
+            return (true, $"Payment released! Funds will be transferred on {scheduledDate:dddd, MMMM dd, yyyy} at 9:00 AM.");
         }
 
         public string GenerateReleaseCode()
@@ -179,6 +192,39 @@ namespace backend.Services
         {
             var order = await _context.Orders.FindAsync(orderId);
             return order?.Status;
+        }
+
+        /// <summary>
+        /// Calculate next payout date based on Mon/Wed/Fri schedule
+        /// </summary>
+        private DateTime GetNextPayoutDate(DateTime? fromDate = null)
+        {
+            var today = fromDate ?? DateTime.UtcNow.Date;
+            var dayOfWeek = today.DayOfWeek;
+
+            // Payout days: Monday, Wednesday, Friday
+            switch (dayOfWeek)
+            {
+                case DayOfWeek.Saturday:
+                case DayOfWeek.Sunday:
+                case DayOfWeek.Monday:
+                    return GetNextDayOfWeek(today, DayOfWeek.Monday);
+                case DayOfWeek.Tuesday:
+                case DayOfWeek.Wednesday:
+                    return GetNextDayOfWeek(today, DayOfWeek.Wednesday);
+                case DayOfWeek.Thursday:
+                case DayOfWeek.Friday:
+                    return GetNextDayOfWeek(today, DayOfWeek.Friday);
+                default:
+                    return today.AddDays(2);
+            }
+        }
+
+        private DateTime GetNextDayOfWeek(DateTime current, DayOfWeek targetDay)
+        {
+            int daysUntilTarget = ((int)targetDay - (int)current.DayOfWeek + 7) % 7;
+            if (daysUntilTarget == 0) daysUntilTarget = 7; // If today is target day, schedule for next week
+            return current.AddDays(daysUntilTarget);
         }
 
         private OrderResponseDto MapToOrderResponseDto(Order order, bool showReleaseCode)
