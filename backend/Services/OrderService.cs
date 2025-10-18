@@ -154,13 +154,12 @@ namespace backend.Services
             product.IsSold = true;
             product.SoldAt = DateTime.UtcNow;
 
-            // TODO: Re-enable bank details check after implementing bank management
             // Check if seller has added bank details
-            //if (string.IsNullOrEmpty(order.Seller.PaystackRecipientCode))
-            //{
-            //    await _context.SaveChangesAsync();
-            //    return (false, "Please add your bank details in Account Settings to receive payouts.");
-            //}
+            if (string.IsNullOrEmpty(order.Seller.PaystackRecipientCode))
+            {
+                await _context.SaveChangesAsync();
+                return (false, "Seller has not added bank details. Please add your bank details in Account Settings to receive payouts.");
+            }
 
             // Calculate next payout date (Mon/Wed/Fri schedule)
             var scheduledDate = GetNextPayoutDate();
@@ -170,7 +169,7 @@ namespace backend.Services
             {
                 OrderId = order.Id,
                 SellerId = sellerId,
-                SellerRecipientCode = order.Seller.PaystackRecipientCode ?? "TEMP_TEST_RECIPIENT", // TODO: Remove after bank management implemented
+                SellerRecipientCode = order.Seller.PaystackRecipientCode,
                 Amount = order.Amount,
                 QueuedAt = DateTime.UtcNow,
                 ScheduledPayoutDate = scheduledDate,
@@ -200,7 +199,7 @@ namespace backend.Services
         /// </summary>
         private DateTime GetNextPayoutDate(DateTime? fromDate = null)
         {
-            var today = fromDate ?? DateTime.UtcNow.Date;
+            var today = DateTime.SpecifyKind((fromDate ?? DateTime.UtcNow).Date, DateTimeKind.Utc);
             var dayOfWeek = today.DayOfWeek;
 
             // Payout days: Monday, Wednesday, Friday
@@ -217,7 +216,7 @@ namespace backend.Services
                 case DayOfWeek.Friday:
                     return GetNextDayOfWeek(today, DayOfWeek.Friday);
                 default:
-                    return today.AddDays(2);
+                    return DateTime.SpecifyKind(today.AddDays(2), DateTimeKind.Utc);
             }
         }
 
@@ -225,7 +224,7 @@ namespace backend.Services
         {
             int daysUntilTarget = ((int)targetDay - (int)current.DayOfWeek + 7) % 7;
             if (daysUntilTarget == 0) daysUntilTarget = 7; // If today is target day, schedule for next week
-            return current.AddDays(daysUntilTarget);
+            return DateTime.SpecifyKind(current.AddDays(daysUntilTarget), DateTimeKind.Utc);
         }
 
         private OrderResponseDto MapToOrderResponseDto(Order order, bool showReleaseCode)

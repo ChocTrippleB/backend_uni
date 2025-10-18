@@ -1,6 +1,7 @@
 using backend.Data;
 using backend.Model;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace backend.Services
 {
@@ -9,15 +10,18 @@ namespace backend.Services
         private readonly AppDbContext _context;
         private readonly IPaystackService _paystackService;
         private readonly ILogger<PayoutService> _logger;
+        private readonly IConfiguration _configuration;
 
         public PayoutService(
             AppDbContext context,
             IPaystackService paystackService,
-            ILogger<PayoutService> logger)
+            ILogger<PayoutService> logger,
+            IConfiguration configuration)
         {
             _context = context;
             _paystackService = paystackService;
             _logger = logger;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -26,19 +30,27 @@ namespace backend.Services
         /// </summary>
         public async Task<(int successCount, int failureCount, List<string> errors)> ProcessPendingPayoutsAsync()
         {
-            var today = DateTime.UtcNow.Date;
+            var today = DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc);
             var errors = new List<string>();
             int successCount = 0;
             int failureCount = 0;
 
             try
             {
+                // Safety check: Don't auto-process if Paystack is in test mode
+                var paystackSecretKey = _configuration["Paystack:SecretKey"];
+                if (!string.IsNullOrEmpty(paystackSecretKey) && paystackSecretKey.Contains("test_"))
+                {
+                    _logger.LogWarning("⚠️ Skipping automatic payout processing - Paystack is in test mode. Use manual API endpoint to test.");
+                    return (0, 0, new List<string> { "Automatic processing disabled in test mode. Use manual API endpoint instead." });
+                }
+
                 // Get all pending payouts scheduled for today or earlier
                 var pendingPayouts = await _context.PayoutQueue
                     .Include(p => p.Order)
                     .Include(p => p.Seller)
                     .Where(p => p.Status == PayoutStatus.Pending &&
-                               p.ScheduledPayoutDate.Date <= today)
+                               p.ScheduledPayoutDate <= today)
                     .OrderBy(p => p.QueuedAt)
                     .ToListAsync();
 
@@ -135,11 +147,16 @@ namespace backend.Services
 
         public async Task<List<PayoutQueue>> GetPendingPayoutsByDateAsync(DateTime date)
         {
+            // Ensure date is in UTC for PostgreSQL comparison
+            var utcDate = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
+            var nextDay = utcDate.AddDays(1);
+
             return await _context.PayoutQueue
                 .Include(p => p.Order)
                 .Include(p => p.Seller)
                 .Where(p => p.Status == PayoutStatus.Pending &&
-                           p.ScheduledPayoutDate.Date == date.Date)
+                           p.ScheduledPayoutDate >= utcDate &&
+                           p.ScheduledPayoutDate < nextDay)
                 .OrderBy(p => p.QueuedAt)
                 .ToListAsync();
         }
@@ -226,7 +243,7 @@ namespace backend.Services
         /// </summary>
         private DateTime GetNextPayoutDate(DateTime? fromDate = null)
         {
-            var today = fromDate ?? DateTime.UtcNow.Date;
+            var today = DateTime.SpecifyKind((fromDate ?? DateTime.UtcNow).Date, DateTimeKind.Utc);
             var dayOfWeek = today.DayOfWeek;
 
             // Payout days: Monday, Wednesday, Friday
@@ -243,7 +260,7 @@ namespace backend.Services
                 case DayOfWeek.Friday:
                     return GetNextDayOfWeek(today, DayOfWeek.Friday);
                 default:
-                    return today.AddDays(2);
+                    return DateTime.SpecifyKind(today.AddDays(2), DateTimeKind.Utc);
             }
         }
 
@@ -251,7 +268,7 @@ namespace backend.Services
         {
             int daysUntilTarget = ((int)targetDay - (int)current.DayOfWeek + 7) % 7;
             if (daysUntilTarget == 0) daysUntilTarget = 7; // If today is target day, schedule for next week
-            return current.AddDays(daysUntilTarget);
+            return DateTime.SpecifyKind(current.AddDays(daysUntilTarget), DateTimeKind.Utc);
         }
     }
 }
