@@ -24,7 +24,7 @@ namespace backend.Controllers
         /// This can be called manually or by a scheduled job
         /// </summary>
         [HttpPost("process")]
-        // TODO: Re-enable admin role after testing: [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ProcessPendingPayouts()
         {
             try
@@ -61,7 +61,7 @@ namespace backend.Controllers
         /// Get pending payouts for a specific date (Admin only)
         /// </summary>
         [HttpGet("pending/{date}")]
-        // TODO: Re-enable admin role after testing: [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetPendingPayoutsByDate(DateTime date)
         {
             try
@@ -172,7 +172,7 @@ namespace backend.Controllers
         /// Retry a failed payout (Admin only)
         /// </summary>
         [HttpPost("{payoutId}/retry")]
-        // TODO: Re-enable admin role after testing: [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RetryFailedPayout(int payoutId)
         {
             try
@@ -210,7 +210,7 @@ namespace backend.Controllers
         /// Get payout statistics (Admin only)
         /// </summary>
         [HttpGet("stats")]
-        // TODO: Re-enable admin role after testing: [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetPayoutStats()
         {
             try

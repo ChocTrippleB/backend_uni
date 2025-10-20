@@ -23,6 +23,7 @@ namespace backend.Data
         public DbSet<UserFollower> UserFollowers { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<PayoutQueue> PayoutQueue { get; set; }
+        public DbSet<BankAccount> BankAccounts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -120,6 +121,17 @@ namespace backend.Data
 
             modelBuilder.Entity<Order>()
                 .HasIndex(o => o.Status);
+
+            // Configure BankAccount relationships
+            modelBuilder.Entity<BankAccount>()
+                .HasOne(b => b.User)
+                .WithMany()
+                .HasForeignKey(b => b.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Add index for querying user's bank accounts
+            modelBuilder.Entity<BankAccount>()
+                .HasIndex(b => new { b.UserId, b.IsPrimary });
         }
     }
 }

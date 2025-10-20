@@ -164,6 +164,100 @@ public class AuthController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Create an admin user (protected - requires Admin role)
+    /// </summary>
+    [Authorize(Roles = "Admin")]
+    [HttpPost("create-admin")]
+    public async Task<IActionResult> CreateAdmin([FromBody] UserRegisterDTO dto)
+    {
+        if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
+            return BadRequest("Email already registered.");
+
+        // Hash password
+        CreatePasswordHash(dto.Password, out byte[] hash, out byte[] salt);
+
+        var adminUser = new User
+        {
+            Username = dto.Username,
+            Email = dto.Email,
+            FullName = dto.FullName,
+            PasswordHash = hash,
+            PasswordSalt = salt,
+            RoleId = 10, // Admin role
+            CreatedAt = DateTime.UtcNow,
+            EmailConfirmed = true, // Auto-confirm admin accounts
+            EmailConfirmationToken = null
+        };
+
+        _context.Users.Add(adminUser);
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            message = "Admin user created successfully",
+            user = new
+            {
+                adminUser.Id,
+                adminUser.Username,
+                adminUser.Email,
+                adminUser.FullName,
+                Role = "Admin"
+            }
+        });
+    }
+
+    /// <summary>
+    /// Bootstrap endpoint - creates the first admin user (unprotected, run once)
+    /// IMPORTANT: This should be disabled/removed in production or after first admin is created
+    /// </summary>
+    [HttpPost("bootstrap-admin")]
+    public async Task<IActionResult> BootstrapAdmin([FromBody] UserRegisterDTO dto)
+    {
+        // Check if any admin already exists
+        var existingAdmin = await _context.Users
+            .Include(u => u.Role)
+            .AnyAsync(u => u.RoleId == 10);
+
+        if (existingAdmin)
+            return BadRequest("An admin user already exists. Use the /create-admin endpoint with admin credentials.");
+
+        if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
+            return BadRequest("Email already registered.");
+
+        // Hash password
+        CreatePasswordHash(dto.Password, out byte[] hash, out byte[] salt);
+
+        var adminUser = new User
+        {
+            Username = dto.Username,
+            Email = dto.Email,
+            FullName = dto.FullName,
+            PasswordHash = hash,
+            PasswordSalt = salt,
+            RoleId = 10, // Admin role
+            CreatedAt = DateTime.UtcNow,
+            EmailConfirmed = true, // Auto-confirm admin accounts
+            EmailConfirmationToken = null
+        };
+
+        _context.Users.Add(adminUser);
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            message = "Bootstrap admin created successfully. This endpoint should now be disabled.",
+            user = new
+            {
+                adminUser.Id,
+                adminUser.Username,
+                adminUser.Email,
+                adminUser.FullName,
+                Role = "Admin"
+            }
+        });
+    }
+
 
     private async Task SendEmailConfirmationAsync(string toEmail, string confirmationLink)
     {

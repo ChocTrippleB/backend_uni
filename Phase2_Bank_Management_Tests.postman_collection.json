@@ -1,0 +1,359 @@
+{
+	"info": {
+		"_postman_id": "phase2-bank-mgmt-2025",
+		"name": "Phase 2: Bank Account Management Tests",
+		"description": "Tests for admin user creation and bank account management system",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "1. Auth - Create Bootstrap Admin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Admin created successfully\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.user.role).to.eql(\"Admin\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"username\": \"admin\",\n  \"email\": \"admin@unimarket.com\",\n  \"fullName\": \"System Administrator\",\n  \"password\": \"Admin123!@#\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/auth/bootstrap-admin",
+					"host": ["{{baseUrl}}"],
+					"path": ["auth", "bootstrap-admin"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2. Auth - Login as Admin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Login successful\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    var jsonData = pm.response.json();",
+							"    pm.environment.set(\"adminToken\", jsonData.token);",
+							"    pm.expect(jsonData.user.role).to.eql(\"Admin\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"admin@unimarket.com\",\n  \"password\": \"Admin123!@#\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/auth/login",
+					"host": ["{{baseUrl}}"],
+					"path": ["auth", "login"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3. Auth - Login as Seller (User ID 1)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Login successful\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    var jsonData = pm.response.json();",
+							"    pm.environment.set(\"token\", jsonData.token);",
+							"    pm.environment.set(\"userId\", jsonData.user.id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"seller@example.com\",\n  \"password\": \"YourPasswordHere\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/auth/login",
+					"host": ["{{baseUrl}}"],
+					"path": ["auth", "login"]
+				},
+				"description": "Login as an existing seller. Update email/password with real credentials from your database."
+			},
+			"response": []
+		},
+		{
+			"name": "4. BankAccount - Add Bank Account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Bank account created\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.bankAccount.isVerified).to.eql(true);",
+							"    pm.expect(jsonData.bankAccount.paystackRecipientCode).to.not.be.null;",
+							"    pm.environment.set(\"bankAccountId\", jsonData.bankAccount.id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"accountNumber\": \"1234567890\",\n  \"bankName\": \"Standard Bank\",\n  \"bankCode\": \"051001\",\n  \"accountHolderName\": \"John Doe\",\n  \"accountType\": \"savings\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/BankAccount",
+					"host": ["{{baseUrl}}"],
+					"path": ["BankAccount"]
+				},
+				"description": "Add a bank account for the logged-in seller. Requires seller token."
+			},
+			"response": []
+		},
+		{
+			"name": "5. BankAccount - Get My Bank Accounts",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/BankAccount",
+					"host": ["{{baseUrl}}"],
+					"path": ["BankAccount"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "6. BankAccount - Get Primary Bank Account",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/BankAccount/primary",
+					"host": ["{{baseUrl}}"],
+					"path": ["BankAccount", "primary"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "7. BankAccount - Update Bank Account",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"accountNumber\": \"0987654321\",\n  \"bankName\": \"FNB\",\n  \"bankCode\": \"250655\",\n  \"accountHolderName\": \"John Doe\",\n  \"accountType\": \"current\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/BankAccount/{{bankAccountId}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["BankAccount", "{{bankAccountId}}"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "8. Payout - Get Stats (Admin Only)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.request.headers.add({",
+							"    key: 'Authorization',",
+							"    value: 'Bearer ' + pm.environment.get('adminToken')",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{adminToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/Payout/stats",
+					"host": ["{{baseUrl}}"],
+					"path": ["Payout", "stats"]
+				},
+				"description": "Get payout statistics. Requires Admin role."
+			},
+			"response": []
+		},
+		{
+			"name": "9. Payout - Process Pending (Admin Only)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{adminToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/Payout/process",
+					"host": ["{{baseUrl}}"],
+					"path": ["Payout", "process"]
+				},
+				"description": "Process all pending payouts. Requires Admin role."
+			},
+			"response": []
+		},
+		{
+			"name": "10. Orders - Verify Release Code (Test Bank Validation)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"orderId\": 18,\n  \"releaseCode\": \"YOUR_RELEASE_CODE\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/Orders/verify-release-code",
+					"host": ["{{baseUrl}}"],
+					"path": ["Orders", "verify-release-code"]
+				},
+				"description": "Verify release code. This will now check if seller has added bank details."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [""]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [""]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5110/api",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "adminToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "bankAccountId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
