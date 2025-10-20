@@ -86,6 +86,8 @@ namespace backend
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IPayoutService, PayoutService>();
             builder.Services.AddScoped<IBankAccountService, BankAccountService>();
+            builder.Services.AddScoped<IReviewService, ReviewService>();
+            builder.Services.AddScoped<ISellerRatingService, SellerRatingService>();
             builder.Services.AddHttpClient<IPaystackService, PaystackService>();
 
             // --- Hangfire ---

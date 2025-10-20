@@ -63,6 +63,7 @@ namespace backend.Services
         public async Task<List<OrderResponseDto>> GetBuyerOrdersAsync(int buyerId)
         {
             var orders = await _context.Orders
+                .Include(o => o.Buyer)
                 .Include(o => o.Seller)
                 .Include(o => o.Product)
                     .ThenInclude(p => p.Images)
@@ -77,6 +78,7 @@ namespace backend.Services
         {
             var orders = await _context.Orders
                 .Include(o => o.Buyer)
+                .Include(o => o.Seller)
                 .Include(o => o.Product)
                     .ThenInclude(p => p.Images)
                 .Where(o => o.SellerId == sellerId &&

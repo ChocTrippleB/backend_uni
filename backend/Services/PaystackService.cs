@@ -9,6 +9,7 @@ namespace backend.Services
     {
         private readonly HttpClient _httpClient;
         private readonly string _secretKey;
+        private readonly string _callbackUrl;
         private const string BaseUrl = "https://api.paystack.co";
 
         public PaystackService(IConfiguration configuration, HttpClient httpClient)
@@ -16,6 +17,8 @@ namespace backend.Services
             _httpClient = httpClient;
             _secretKey = configuration["Paystack:SecretKey"]
                 ?? throw new InvalidOperationException("Paystack:SecretKey not configured");
+            _callbackUrl = configuration["Paystack:CallbackUrl"]
+                ?? "http://localhost:5175/payment/callback"; // Default for development
 
             _httpClient.BaseAddress = new Uri(BaseUrl);
             _httpClient.DefaultRequestHeaders.Authorization =
@@ -38,7 +41,7 @@ namespace backend.Services
                     amount = (int)(amount * 100), // Convert to kobo
                     reference,
                     currency = "ZAR", // South African Rand
-                    callback_url = "https://yourdomain.com/payment/callback" // TODO: Update with your domain
+                    callback_url = _callbackUrl
                 };
 
                 var json = JsonSerializer.Serialize(requestBody);

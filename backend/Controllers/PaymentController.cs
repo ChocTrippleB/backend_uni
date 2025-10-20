@@ -89,6 +89,7 @@ namespace backend.Controllers
         /// Verify Paystack payment and update order
         /// </summary>
         [HttpPost("verify")]
+        [AllowAnonymous] // Allow unauthenticated access for callback from Paystack redirect
         public async Task<IActionResult> VerifyPayment([FromBody] VerifyPaymentDto dto)
         {
             try

@@ -24,6 +24,8 @@ namespace backend.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<PayoutQueue> PayoutQueue { get; set; }
         public DbSet<BankAccount> BankAccounts { get; set; }
+        public DbSet<Review> Reviews { get; set; }
+        public DbSet<SellerRating> SellerRatings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -132,6 +134,53 @@ namespace backend.Data
             // Add index for querying user's bank accounts
             modelBuilder.Entity<BankAccount>()
                 .HasIndex(b => new { b.UserId, b.IsPrimary });
+
+            // Configure Review relationships
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Order)
+                .WithMany()
+                .HasForeignKey(r => r.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Buyer)
+                .WithMany()
+                .HasForeignKey(r => r.BuyerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Seller)
+                .WithMany()
+                .HasForeignKey(r => r.SellerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Product)
+                .WithMany()
+                .HasForeignKey(r => r.ProductId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // One review per order (unique constraint)
+            modelBuilder.Entity<Review>()
+                .HasIndex(r => r.OrderId)
+                .IsUnique();
+
+            // Indexes for Review queries
+            modelBuilder.Entity<Review>()
+                .HasIndex(r => r.SellerId);
+
+            modelBuilder.Entity<Review>()
+                .HasIndex(r => r.BuyerId);
+
+            modelBuilder.Entity<Review>()
+                .HasIndex(r => r.CreatedAt);
+
+            // Configure SellerRating (SellerId is primary key)
+            modelBuilder.Entity<SellerRating>()
+                .HasOne(sr => sr.Seller)
+                .WithMany()
+                .HasForeignKey(sr => sr.SellerId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
