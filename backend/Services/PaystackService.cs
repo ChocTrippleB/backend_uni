@@ -18,7 +18,7 @@ namespace backend.Services
             _secretKey = configuration["Paystack:SecretKey"]
                 ?? throw new InvalidOperationException("Paystack:SecretKey not configured");
             _callbackUrl = configuration["Paystack:CallbackUrl"]
-                ?? "http://localhost:5175/payment/callback"; // Default for development
+                ?? "http://localhost:5173/payment/callback"; // Default for development
 
             _httpClient.BaseAddress = new Uri(BaseUrl);
             _httpClient.DefaultRequestHeaders.Authorization =

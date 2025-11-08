@@ -134,6 +134,13 @@ public class AuthController : ControllerBase
             user.Username,
             user.Email,
             user.FullName,
+            user.Bio,
+            user.Faculty,
+            user.Course,
+            user.PhoneNumber,
+            user.ProfilePictureUrl,
+            user.InstitutionId,
+            user.CreatedAt,
             FollowersCount = user.Followers?.Count ?? 0,
             FollowingCount= user.Followed?.Count ?? 0,
             ListingsCount = user.Items?.Count ?? 0,
@@ -158,9 +165,15 @@ public class AuthController : ControllerBase
             user.Id,
             user.Username,
             user.FullName,
+            user.Bio,
+            user.Faculty,
+            user.Course,
+            user.ProfilePictureUrl,
+            user.CreatedAt,
             FollowersCount = user.Followers?.Count ?? 0,
             FollowingCount = user.Followed?.Count ?? 0,
             ListingsCount = user.Items?.Count ?? 0
+            // Note: Email and PhoneNumber are private, not exposed in public view
         });
     }
 

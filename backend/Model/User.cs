@@ -51,6 +51,36 @@ namespace backend.Model
         /// </summary>
         public string? PhoneNumber { get; set; }
 
+        // ✅ Profile Enhancement Fields (Week 2)
+        /// <summary>
+        /// User bio/about section (max 500 characters)
+        /// </summary>
+        [MaxLength(500)]
+        public string? Bio { get; set; }
+
+        /// <summary>
+        /// Profile picture URL (local path or cloud storage URL)
+        /// </summary>
+        public string? ProfilePictureUrl { get; set; }
+
+        /// <summary>
+        /// Faculty/Department (e.g., "Engineering", "Business Sciences")
+        /// </summary>
+        [MaxLength(100)]
+        public string? Faculty { get; set; }
+
+        /// <summary>
+        /// Course/Major (e.g., "Computer Science", "Accounting")
+        /// </summary>
+        [MaxLength(100)]
+        public string? Course { get; set; }
+
+        /// <summary>
+        /// Institution ID - for multi-university support (future)
+        /// Currently defaults to 1 (Nelson Mandela University)
+        /// </summary>
+        public int? InstitutionId { get; set; } = 1;
+
         // ✅ Listings posted by the user
         public List<Product> Items { get; set; }
 
