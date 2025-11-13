@@ -107,7 +107,10 @@ namespace backend.Services
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
-                query = query.Where(i => i.Name.Contains(search) || i.Description.Contains(search));
+            {
+                var lowerSearch = search.ToLower();
+                query = query.Where(i => i.Name.ToLower().Contains(lowerSearch) || i.Description.ToLower().Contains(lowerSearch));
+            }
 
             if (!string.IsNullOrWhiteSpace(category))
                 query = query.Where(i => i.SubCategory.Category.Name == category);
@@ -168,13 +171,52 @@ namespace backend.Services
 
         public async Task<List<object>> SuggestItemsAsync(string query)
         {
-            return await _db.Products
-                .Where(i => i.Name.Contains(query))
-                .OrderBy(i => i.Name)
+            var lowerQuery = query.ToLower();
+
+            // Search products (case-insensitive)
+            var products = await _db.Products
+                .Include(p => p.Images)
+                .Include(p => p.SubCategory).ThenInclude(sc => sc.Category)
+                .Where(p => !p.IsDeleted && (p.Name.ToLower().Contains(lowerQuery) || p.Brand.ToLower().Contains(lowerQuery)))
+                .OrderBy(p => p.Name)
                 .Take(5)
-                .Select(i => new { i.Id, i.Name })
+                .Select(p => new
+                {
+                    type = "product",
+                    id = p.Id,
+                    name = p.Name,
+                    imageUrl = p.Images.FirstOrDefault() != null ? p.Images.FirstOrDefault().downloadUrl : null,
+                    category = p.SubCategory.Category.Name,
+                    condition = p.Condition,
+                    price = p.Price
+                })
                 .Cast<object>()
                 .ToListAsync();
+
+            // Search users (case-insensitive)
+            var users = await _db.Users
+                .Where(u => u.Username.ToLower().Contains(lowerQuery) || u.FullName.ToLower().Contains(lowerQuery))
+                .OrderBy(u => u.Username)
+                .Take(3)
+                .Select(u => new
+                {
+                    type = "user",
+                    id = u.Id,
+                    name = u.Username,
+                    fullName = u.FullName,
+                    imageUrl = u.ProfilePictureUrl,
+                    institution = "",  // Institution relationship not needed for suggestions
+                    faculty = u.Faculty ?? ""
+                })
+                .Cast<object>()
+                .ToListAsync();
+
+            // Combine products and users
+            var combined = new List<object>();
+            combined.AddRange(products);
+            combined.AddRange(users);
+
+            return combined;
         }
 
         public async Task<List<object>> GetItemsBySellerAsync(int sellerId)

@@ -32,10 +32,11 @@ namespace backend.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Role>().HasData(
-                new Role { Id = 1, Name = "Seller" },
-                new Role { Id = 2, Name = "Buyer" },
-                new Role { Id = 10, Name = "Admin" }
+                new Role { Id = 1, Name = "User", Description = "Default role for all users", CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                new Role { Id = 2, Name = "Buyer", Description = "Legacy buyer role", CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                new Role { Id = 10, Name = "Admin", Description = "Full system access", CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
             );
+
 
             // Seed Categories
             modelBuilder.Entity<Category>().HasData(

@@ -43,12 +43,12 @@ namespace backend.Services
                     throw new UnauthorizedAccessException("Order not found or you are not authorized to review this order");
                 }
 
-                // 2. Verify order is completed
-                if (order.Status != OrderStatus.Completed)
+                // 2. Verify order is completed or awaiting payout (buyer has delivered item)
+                if (order.Status != OrderStatus.AwaitingPayout && order.Status != OrderStatus.Completed)
                 {
-                    _logger.LogWarning("Review creation failed: Order {OrderId} is not completed (Status: {Status})",
+                    _logger.LogWarning("Review creation failed: Order {OrderId} is not ready for review (Status: {Status})",
                         dto.OrderId, order.Status);
-                    throw new InvalidOperationException("You can only review completed orders");
+                    throw new InvalidOperationException("You can only review orders after the item has been delivered");
                 }
 
                 // 3. Check if already reviewed
@@ -268,18 +268,38 @@ namespace backend.Services
 
         public async Task<bool> CanReviewOrderAsync(int buyerId, int orderId)
         {
+            _logger.LogInformation("🔍 CanReviewOrder called - BuyerId: {BuyerId}, OrderId: {OrderId}", buyerId, orderId);
+
             var order = await _context.Orders
                 .FirstOrDefaultAsync(o => o.Id == orderId && o.BuyerId == buyerId);
 
             if (order == null)
+            {
+                _logger.LogWarning("❌ Order not found or doesn't belong to buyer");
                 return false;
+            }
 
-            if (order.Status != OrderStatus.Completed)
+            _logger.LogInformation("✅ Order found - Status: {Status} ({StatusInt})", order.Status, (int)order.Status);
+
+            // Allow reviews for orders that are AwaitingPayout or Completed (buyer has received item)
+            if (order.Status != OrderStatus.AwaitingPayout && order.Status != OrderStatus.Completed)
+            {
+                _logger.LogWarning("❌ Invalid order status for review: {Status}", order.Status);
                 return false;
+            }
 
-            if (await HasReviewedOrderAsync(orderId))
+            _logger.LogInformation("✅ Order status is valid (AwaitingPayout or Completed)");
+
+            var hasReview = await HasReviewedOrderAsync(orderId);
+            _logger.LogInformation("📝 HasReview check result: {HasReview}", hasReview);
+
+            if (hasReview)
+            {
+                _logger.LogWarning("❌ Order already has a review");
                 return false;
+            }
 
+            _logger.LogInformation("🎉 Can review: TRUE");
             return true;
         }
 

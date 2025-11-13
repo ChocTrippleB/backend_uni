@@ -12,7 +12,8 @@
     "http": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": true,
+      //"launchBrowser": true,
+      "launchBrowser": false,
       "launchUrl": "weatherforecast",
       "applicationUrl": "http://localhost:5110",
       "environmentVariables": {

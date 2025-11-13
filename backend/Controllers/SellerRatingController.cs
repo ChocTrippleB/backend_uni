@@ -63,7 +63,7 @@ namespace backend.Controllers
         /// Manually recalculate seller rating (Admin only - optional)
         /// </summary>
         [HttpPost("{sellerId}/recalculate")]
-        [Authorize] // Add [Authorize(Roles = "Admin")] when RBAC is implemented
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RecalculateRating(int sellerId)
         {
             try

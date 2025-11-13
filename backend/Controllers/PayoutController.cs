@@ -90,7 +90,7 @@ namespace backend.Controllers
         /// Get all payouts for the current seller
         /// </summary>
         [HttpGet("my-payouts")]
-        [Authorize(Roles = "Seller")]
+        [Authorize] // Any authenticated user can view their own payouts
         public async Task<IActionResult> GetMyPayouts()
         {
             try
