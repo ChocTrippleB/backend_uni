@@ -34,7 +34,7 @@ namespace backend.DTO
     public class BankAccountResponseDto
     {
         public int Id { get; set; }
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public string AccountNumber { get; set; }
         public string BankName { get; set; }
         public string BankCode { get; set; }

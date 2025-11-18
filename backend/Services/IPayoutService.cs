@@ -18,7 +18,7 @@ namespace backend.Services
         /// <summary>
         /// Get all payouts for a specific seller
         /// </summary>
-        Task<List<PayoutQueue>> GetSellerPayoutsAsync(int sellerId);
+        Task<List<PayoutQueue>> GetSellerPayoutsAsync(Guid sellerId);
 
         /// <summary>
         /// Get a specific payout by ID

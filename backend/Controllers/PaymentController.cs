@@ -1,4 +1,5 @@
 using backend.DTO;
+using backend.Helpers;
 using backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,8 +29,8 @@ namespace backend.Controllers
         {
             try
             {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userIdClaim))
+                var userId = User.GetUserId();
+                if (userId == null)
                 {
                     return Unauthorized(new { message = "Invalid user authentication" });
                 }

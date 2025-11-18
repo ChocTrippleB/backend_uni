@@ -18,7 +18,7 @@ namespace backend.Controllers
 
         // ✅ Get cart for a user
         [HttpGet("{userId}")]
-        public async Task<IActionResult> GetCart(int userId)
+        public async Task<IActionResult> GetCart(Guid userId)
         {
             var cart = await _cartService.GetCartAsync(userId);
             return Ok(cart);
@@ -26,7 +26,7 @@ namespace backend.Controllers
 
         // ✅ Add product to cart
         [HttpPost("{userId}/add")]
-        public async Task<IActionResult> AddItem(int userId, [FromBody] AddCartItemDto dto)
+        public async Task<IActionResult> AddItem(Guid userId, [FromBody] AddCartItemDto dto)
         {
             var cart = await _cartService.AddItemAsync(userId, dto.ProductId, dto.Quantity);
             return Ok(cart);
@@ -34,7 +34,7 @@ namespace backend.Controllers
 
         [HttpPatch("{userId}/items/{productId}")]
         public async Task<IActionResult> UpdateItemQuantity(
-                                                            int userId,
+                                                            Guid userId,
                                                             int productId,
                                                             [FromQuery] int delta = 0)  // positive = increment, negative = decrement
         {
@@ -48,7 +48,7 @@ namespace backend.Controllers
 
         // ✅ Remove product from cart
         [HttpDelete("{userId}/remove/{productId}")]
-        public async Task<IActionResult> RemoveItem(int userId, int productId)
+        public async Task<IActionResult> RemoveItem(Guid userId, int productId)
         {
             var cart = await _cartService.RemoveItemAsync(userId, productId);
             return Ok(cart);
@@ -56,7 +56,7 @@ namespace backend.Controllers
 
         // ✅ Clear cart
         [HttpDelete("{userId}/clear")]
-        public async Task<IActionResult> ClearCart(int userId)
+        public async Task<IActionResult> ClearCart(Guid userId)
         {
             var cart = await _cartService.ClearCartAsync(userId);
             return Ok(cart);

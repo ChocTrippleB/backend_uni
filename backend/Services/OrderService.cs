@@ -16,7 +16,7 @@ namespace backend.Services
             _paystackService = paystackService;
         }
 
-        public async Task<Order> CreateOrderAsync(int buyerId, CreateOrderDto dto)
+        public async Task<Order> CreateOrderAsync(Guid buyerId, CreateOrderDto dto)
         {
             // Get product details
             var product = await _context.Products
@@ -60,7 +60,7 @@ namespace backend.Services
                 .FirstOrDefaultAsync(o => o.Id == orderId);
         }
 
-        public async Task<List<OrderResponseDto>> GetBuyerOrdersAsync(int buyerId)
+        public async Task<List<OrderResponseDto>> GetBuyerOrdersAsync(Guid buyerId)
         {
             var orders = await _context.Orders
                 .Include(o => o.Buyer)
@@ -74,7 +74,7 @@ namespace backend.Services
             return orders.Select(o => MapToOrderResponseDto(o, showReleaseCode: true)).ToList();
         }
 
-        public async Task<List<OrderResponseDto>> GetSellerOrdersAsync(int sellerId)
+        public async Task<List<OrderResponseDto>> GetSellerOrdersAsync(Guid sellerId)
         {
             var orders = await _context.Orders
                 .Include(o => o.Buyer)
@@ -118,7 +118,7 @@ namespace backend.Services
         }
 
         public async Task<(bool success, string message)> VerifyReleaseCodeAsync(
-            int sellerId,
+            Guid sellerId,
             VerifyReleaseCodeDto dto)
         {
             var order = await _context.Orders

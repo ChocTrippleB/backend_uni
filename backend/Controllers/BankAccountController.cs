@@ -1,4 +1,5 @@
 using backend.DTO;
+using backend.Helpers;
 using backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -135,14 +136,14 @@ namespace backend.Controllers
             return Ok(new { message });
         }
 
-        private int GetCurrentUserId()
+        private Guid GetCurrentUserId()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            var userId = User.GetUserId();
+            if (userId == null)
             {
                 throw new UnauthorizedAccessException("User not authenticated");
             }
-            return userId;
+            return userId.Value;
         }
     }
 }

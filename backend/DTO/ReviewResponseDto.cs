@@ -6,12 +6,12 @@ namespace backend.DTO
         public int OrderId { get; set; }
 
         // Buyer Info
-        public int BuyerId { get; set; }
+        public Guid BuyerId { get; set; }
         public string BuyerName { get; set; } = string.Empty;
         public string? BuyerAvatar { get; set; }
 
         // Seller Info
-        public int SellerId { get; set; }
+        public Guid SellerId { get; set; }
         public string SellerName { get; set; } = string.Empty;
 
         // Product Info

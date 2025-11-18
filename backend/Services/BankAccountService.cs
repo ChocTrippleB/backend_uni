@@ -22,7 +22,7 @@ namespace backend.Services
         }
 
         public async Task<(bool success, string message, BankAccountResponseDto? bankAccount)> AddBankAccountAsync(
-            int userId,
+            Guid userId,
             AddBankAccountDto dto)
         {
             try
@@ -88,7 +88,7 @@ namespace backend.Services
             }
         }
 
-        public async Task<BankAccountResponseDto?> GetBankAccountByIdAsync(int userId, int bankAccountId)
+        public async Task<BankAccountResponseDto?> GetBankAccountByIdAsync(Guid userId, int bankAccountId)
         {
             var bankAccount = await _context.BankAccounts
                 .FirstOrDefaultAsync(b => b.Id == bankAccountId && b.UserId == userId);
@@ -96,7 +96,7 @@ namespace backend.Services
             return bankAccount != null ? MapToDto(bankAccount) : null;
         }
 
-        public async Task<List<BankAccountResponseDto>> GetUserBankAccountsAsync(int userId)
+        public async Task<List<BankAccountResponseDto>> GetUserBankAccountsAsync(Guid userId)
         {
             var bankAccounts = await _context.BankAccounts
                 .Where(b => b.UserId == userId)
@@ -107,7 +107,7 @@ namespace backend.Services
             return bankAccounts.Select(MapToDto).ToList();
         }
 
-        public async Task<BankAccountResponseDto?> GetPrimaryBankAccountAsync(int userId)
+        public async Task<BankAccountResponseDto?> GetPrimaryBankAccountAsync(Guid userId)
         {
             var bankAccount = await _context.BankAccounts
                 .FirstOrDefaultAsync(b => b.UserId == userId && b.IsPrimary);
@@ -116,7 +116,7 @@ namespace backend.Services
         }
 
         public async Task<(bool success, string message)> UpdateBankAccountAsync(
-            int userId,
+            Guid userId,
             int bankAccountId,
             AddBankAccountDto dto)
         {
@@ -174,7 +174,7 @@ namespace backend.Services
             }
         }
 
-        public async Task<(bool success, string message)> SetPrimaryBankAccountAsync(int userId, int bankAccountId)
+        public async Task<(bool success, string message)> SetPrimaryBankAccountAsync(Guid userId, int bankAccountId)
         {
             try
             {
@@ -218,7 +218,7 @@ namespace backend.Services
             }
         }
 
-        public async Task<(bool success, string message)> DeleteBankAccountAsync(int userId, int bankAccountId)
+        public async Task<(bool success, string message)> DeleteBankAccountAsync(Guid userId, int bankAccountId)
         {
             try
             {

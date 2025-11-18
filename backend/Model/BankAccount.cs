@@ -13,7 +13,7 @@ namespace backend.Model
         /// User ID (seller who owns this bank account)
         /// </summary>
         [Required]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public User User { get; set; }
 
         /// <summary>

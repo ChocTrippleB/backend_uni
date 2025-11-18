@@ -21,7 +21,7 @@ namespace backend.Services
             _logger = logger;
         }
 
-        public async Task<ReviewResponseDto> CreateReviewAsync(int buyerId, CreateReviewDto dto)
+        public async Task<ReviewResponseDto> CreateReviewAsync(Guid buyerId, CreateReviewDto dto)
         {
             try
             {
@@ -95,7 +95,7 @@ namespace backend.Services
             }
         }
 
-        public async Task<ReviewResponseDto?> UpdateReviewAsync(int reviewId, int buyerId, UpdateReviewDto dto)
+        public async Task<ReviewResponseDto?> UpdateReviewAsync(int reviewId, Guid buyerId, UpdateReviewDto dto)
         {
             try
             {
@@ -166,7 +166,7 @@ namespace backend.Services
             }
         }
 
-        public async Task<bool> DeleteReviewAsync(int reviewId, int buyerId)
+        public async Task<bool> DeleteReviewAsync(int reviewId, Guid buyerId)
         {
             try
             {
@@ -234,7 +234,7 @@ namespace backend.Services
             return MapToDto(review, review.Order);
         }
 
-        public async Task<List<ReviewResponseDto>> GetSellerReviewsAsync(int sellerId, int page = 1, int pageSize = 10)
+        public async Task<List<ReviewResponseDto>> GetSellerReviewsAsync(Guid sellerId, int page = 1, int pageSize = 10)
         {
             var reviews = await _context.Reviews
                 .Include(r => r.Buyer)
@@ -251,7 +251,7 @@ namespace backend.Services
             return reviews.Select(r => MapToDto(r, r.Order)).ToList();
         }
 
-        public async Task<List<ReviewResponseDto>> GetBuyerReviewsAsync(int buyerId)
+        public async Task<List<ReviewResponseDto>> GetBuyerReviewsAsync(Guid buyerId)
         {
             var reviews = await _context.Reviews
                 .Include(r => r.Buyer)
@@ -266,7 +266,7 @@ namespace backend.Services
             return reviews.Select(r => MapToDto(r, r.Order)).ToList();
         }
 
-        public async Task<bool> CanReviewOrderAsync(int buyerId, int orderId)
+        public async Task<bool> CanReviewOrderAsync(Guid buyerId, int orderId)
         {
             _logger.LogInformation("🔍 CanReviewOrder called - BuyerId: {BuyerId}, OrderId: {OrderId}", buyerId, orderId);
 

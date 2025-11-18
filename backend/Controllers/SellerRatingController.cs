@@ -22,7 +22,7 @@ namespace backend.Controllers
         /// </summary>
         [HttpGet("{sellerId}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetSellerRating(int sellerId)
+        public async Task<IActionResult> GetSellerRating(Guid sellerId)
         {
             try
             {
@@ -64,7 +64,7 @@ namespace backend.Controllers
         /// </summary>
         [HttpPost("{sellerId}/recalculate")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> RecalculateRating(int sellerId)
+        public async Task<IActionResult> RecalculateRating(Guid sellerId)
         {
             try
             {

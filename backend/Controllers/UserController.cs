@@ -1,5 +1,6 @@
 using backend.Data;
 using backend.DTO;
+using backend.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -70,7 +71,9 @@ namespace backend.Controllers
         [HttpGet("profile")]
         public async Task<IActionResult> GetProfile()
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var userId = User.GetUserId();
+            if (userId == null)
+                return Unauthorized(new { message = "Invalid user token" });
 
             var user = await _context.Users
                 .Include(u => u.Role)
@@ -108,7 +111,9 @@ namespace backend.Controllers
         [HttpPut("profile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto dto)
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var userId = User.GetUserId();
+            if (userId == null)
+                return Unauthorized(new { message = "Invalid user token" });
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
@@ -162,13 +167,46 @@ namespace backend.Controllers
         /// </summary>
         [AllowAnonymous]
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserById(int id)
+        public async Task<IActionResult> GetUserById(Guid id)
         {
             var user = await _context.Users
                 .Include(u => u.Followers)
                 .Include(u => u.Followed)
                 .Include(u => u.Items)
                 .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user == null)
+                return NotFound(new { message = "User not found" });
+
+            return Ok(new
+            {
+                user.Id,
+                user.Username,
+                user.FullName,
+                user.Bio,
+                user.Faculty,
+                user.Course,
+                user.ProfilePictureUrl,
+                user.CreatedAt,
+                FollowersCount = user.Followers?.Count ?? 0,
+                FollowingCount = user.Followed?.Count ?? 0,
+                ListingsCount = user.Items?.Count ?? 0
+                // Note: Email and PhoneNumber are private, not exposed in public view
+            });
+        }
+
+        /// <summary>
+        /// Get user profile by username (public view) - for /@username URLs
+        /// </summary>
+        [AllowAnonymous]
+        [HttpGet("@{username}")]
+        public async Task<IActionResult> GetUserByUsername(string username)
+        {
+            var user = await _context.Users
+                .Include(u => u.Followers)
+                .Include(u => u.Followed)
+                .Include(u => u.Items)
+                .FirstOrDefaultAsync(u => u.Username == username);
 
             if (user == null)
                 return NotFound(new { message = "User not found" });
@@ -201,7 +239,10 @@ namespace backend.Controllers
                 return BadRequest(new { message = "No image file provided" });
 
             // Get current user ID
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var userId = User.GetUserId();
+            if (userId == null)
+                return Unauthorized(new { message = "Invalid user token" });
+
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)

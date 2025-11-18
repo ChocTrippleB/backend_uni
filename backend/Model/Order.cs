@@ -18,11 +18,11 @@ namespace backend.Model
         public int Id { get; set; }
 
         [Required]
-        public int BuyerId { get; set; }
+        public Guid BuyerId { get; set; }
         public User Buyer { get; set; } = null!;
 
         [Required]
-        public int SellerId { get; set; }
+        public Guid SellerId { get; set; }
         public User Seller { get; set; } = null!;
 
         [Required]

@@ -13,8 +13,14 @@
         public bool IsDeleted { get; set; } = false;  // soft delete
         public bool IsSold { get; set; } = false;  // ✅ Track if item is sold
         public DateTime? SoldAt { get; set; }  // ✅ When item was sold
-        public int SellerId { get; set; }  // 🔥 add this
+        public Guid SellerId { get; set; }  // 🔥 add this
         public User Seller { get; set; } = null!; // optional nav property
+
+        /// <summary>
+        /// URL-friendly slug for shareable links (e.g., "macbook-pro-2020")
+        /// </summary>
+        public string Slug { get; set; } = null!;
+
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 

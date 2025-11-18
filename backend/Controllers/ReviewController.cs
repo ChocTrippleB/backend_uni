@@ -1,4 +1,5 @@
 using backend.DTO;
+using backend.Helpers;
 using backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,12 +30,6 @@ namespace backend.Controllers
             try
             {
                 var buyerId = GetCurrentUserId();
-
-                if (buyerId == 0)
-                {
-                    return Unauthorized(new { success = false, message = "User not authenticated" });
-                }
-
                 var review = await _reviewService.CreateReviewAsync(buyerId, dto);
                 return Ok(new { success = true, data = review, message = "Review created successfully" });
             }
@@ -63,12 +58,6 @@ namespace backend.Controllers
             try
             {
                 var buyerId = GetCurrentUserId();
-
-                if (buyerId == 0)
-                {
-                    return Unauthorized(new { success = false, message = "User not authenticated" });
-                }
-
                 var review = await _reviewService.UpdateReviewAsync(reviewId, buyerId, dto);
 
                 if (review == null)
@@ -99,12 +88,6 @@ namespace backend.Controllers
             try
             {
                 var buyerId = GetCurrentUserId();
-
-                if (buyerId == 0)
-                {
-                    return Unauthorized(new { success = false, message = "User not authenticated" });
-                }
-
                 var success = await _reviewService.DeleteReviewAsync(reviewId, buyerId);
 
                 if (!success)
@@ -170,7 +153,7 @@ namespace backend.Controllers
         /// </summary>
         [HttpGet("seller/{sellerId}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetSellerReviews(int sellerId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetSellerReviews(Guid sellerId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
@@ -197,12 +180,6 @@ namespace backend.Controllers
             try
             {
                 var buyerId = GetCurrentUserId();
-
-                if (buyerId == 0)
-                {
-                    return Unauthorized(new { success = false, message = "User not authenticated" });
-                }
-
                 var reviews = await _reviewService.GetBuyerReviewsAsync(buyerId);
                 return Ok(new { success = true, data = reviews });
             }
@@ -223,12 +200,6 @@ namespace backend.Controllers
             try
             {
                 var buyerId = GetCurrentUserId();
-
-                if (buyerId == 0)
-                {
-                    return Unauthorized(new { success = false, message = "User not authenticated" });
-                }
-
                 var canReview = await _reviewService.CanReviewOrderAsync(buyerId, orderId);
                 return Ok(new { success = true, canReview });
             }
@@ -239,10 +210,14 @@ namespace backend.Controllers
             }
         }
 
-        private int GetCurrentUserId()
+        private Guid GetCurrentUserId()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return int.TryParse(userIdClaim, out var userId) ? userId : 0;
+            var userId = User.GetUserId();
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException("User not authenticated");
+            }
+            return userId.Value;
         }
     }
 }

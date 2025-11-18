@@ -18,7 +18,7 @@ namespace backend.Services
             _db = db;
         }
 
-        public async Task<Cart> GetCartAsync(int userId)
+        public async Task<Cart> GetCartAsync(Guid userId)
         {
             var cart = await _db.Carts
                 .Include(c => c.Items)
@@ -46,7 +46,7 @@ namespace backend.Services
         }
 
 
-        public async Task<Cart> AddItemAsync(int userId, int productId, int quantity)
+        public async Task<Cart> AddItemAsync(Guid userId, int productId, int quantity)
         {
             var cart = await GetOrCreateCartAsync(userId);
             var product = await _db.Products.FindAsync(productId)
@@ -77,7 +77,7 @@ namespace backend.Services
             return cart;
         }
 
-        public async Task<Cart> UpdateItemQuantityAsync(int userId, int productId, int delta)
+        public async Task<Cart> UpdateItemQuantityAsync(Guid userId, int productId, int delta)
         {
             var cart = await GetOrCreateCartAsync(userId);
             var item = cart.Items.FirstOrDefault(i => i.ProductId == productId);
@@ -98,7 +98,7 @@ namespace backend.Services
         }
 
 
-        public async Task<Cart> RemoveItemAsync(int userId, int productId)
+        public async Task<Cart> RemoveItemAsync(Guid userId, int productId)
         {
             var cart = await GetOrCreateCartAsync(userId);
             var item = cart.Items.FirstOrDefault(i => i.ProductId == productId);
@@ -114,7 +114,7 @@ namespace backend.Services
             return cart;
         }
 
-        public async Task<Cart> ClearCartAsync(int userId)
+        public async Task<Cart> ClearCartAsync(Guid userId)
         {
             var cart = await GetOrCreateCartAsync(userId);
             cart.Items.Clear();
@@ -123,7 +123,7 @@ namespace backend.Services
             return cart;
         }
 
-        private async Task<Cart> GetOrCreateCartAsync(int userId)
+        private async Task<Cart> GetOrCreateCartAsync(Guid userId)
         {
             var cart = await _db.Carts
                 .Include(c => c.Items)

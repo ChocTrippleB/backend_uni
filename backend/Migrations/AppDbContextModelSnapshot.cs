@@ -65,8 +65,8 @@ namespace backend.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("VerificationFailureReason")
                         .HasColumnType("text");
@@ -89,8 +89,8 @@ namespace backend.Migrations
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("numeric");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -235,8 +235,8 @@ namespace backend.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric");
 
-                    b.Property<int>("BuyerId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("BuyerId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("BuyerPhone")
                         .HasColumnType("text");
@@ -269,8 +269,8 @@ namespace backend.Migrations
                     b.Property<DateTime?>("ReleasedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("SellerId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("SellerId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ShippingAddress")
                         .HasColumnType("text");
@@ -317,8 +317,8 @@ namespace backend.Migrations
                     b.Property<DateTime>("ScheduledPayoutDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("SellerId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("SellerId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("SellerRecipientCode")
                         .IsRequired()
@@ -380,8 +380,12 @@ namespace backend.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
 
-                    b.Property<int>("SellerId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("SellerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("SoldAt")
                         .HasColumnType("timestamp with time zone");
@@ -411,8 +415,8 @@ namespace backend.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BuyerId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("BuyerId")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("CommunicationRating")
                         .HasColumnType("integer");
@@ -449,8 +453,8 @@ namespace backend.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<int>("SellerId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("SellerId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("SellerResponse")
                         .HasMaxLength(2000)
@@ -531,8 +535,8 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Model.SellerRating", b =>
                 {
-                    b.Property<int>("SellerId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("SellerId")
+                        .HasColumnType("uuid");
 
                     b.Property<decimal>("AverageRating")
                         .HasColumnType("numeric");
@@ -658,11 +662,9 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Model.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Bio")
                         .HasMaxLength(500)
@@ -732,11 +734,11 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Model.UserFollower", b =>
                 {
-                    b.Property<int>("FollowerId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("FollowerId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("FollowedId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("FollowedId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("FollowerId", "FollowedId");
 

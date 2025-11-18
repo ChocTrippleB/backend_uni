@@ -1,5 +1,6 @@
 ﻿using backend.Data;
 using backend.DTO;
+using backend.Helpers;
 using backend.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,26 +22,23 @@ namespace backend.Controllers
         [HttpPost("follow")]
         public async Task<IActionResult> Follow([FromBody] FollowRequest model)
         {
-            var userIdClaim = User.FindFirst("sub") ?? User.FindFirst(ClaimTypes.NameIdentifier);
-
-            if (userIdClaim == null)
+            var currentUserId = User.GetUserId();
+            if (currentUserId == null)
                 return Unauthorized("User ID not found in token.");
 
-            var currentUserId = int.Parse(userIdClaim.Value);
-
-            if (currentUserId == model.FollowedId)
+            if (currentUserId.Value == model.FollowedId)
                 return BadRequest("You can't follow yourself.");
 
             // Check if already following
             var existing = await _context.UserFollowers
-                .FirstOrDefaultAsync(f => f.FollowerId == currentUserId && f.FollowedId == model.FollowedId);
+                .FirstOrDefaultAsync(f => f.FollowerId == currentUserId.Value && f.FollowedId == model.FollowedId);
 
             if (existing != null)
                 return BadRequest("Already following.");
 
             var follow = new UserFollower
             {
-                FollowerId = currentUserId,
+                FollowerId = currentUserId.Value,
                 FollowedId = model.FollowedId
             };
 
@@ -52,14 +50,11 @@ namespace backend.Controllers
 
         [HttpGet("{id}")]
         [Authorize]
-        public async Task<IActionResult> GetUserProfile(int id)
+        public async Task<IActionResult> GetUserProfile(Guid id)
         {
-            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub) ?? User.FindFirst(ClaimTypes.NameIdentifier);
-
-            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
+            var userId = User.GetUserId();
+            if (userId == null)
                 return Unauthorized("User ID not found in token.");
-
-            var userId = int.Parse(userIdClaim.Value);
 
             var user = await _context.Users
                 .Include(u => u.Followers)
@@ -69,7 +64,7 @@ namespace backend.Controllers
             if (user == null) return NotFound();
 
             bool isFollowed = await _context.UserFollowers
-                .AnyAsync(f => f.FollowerId == userId && f.FollowedId == id);
+                .AnyAsync(f => f.FollowerId == userId.Value && f.FollowedId == id);
 
             var result = new
             {

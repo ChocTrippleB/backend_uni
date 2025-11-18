@@ -11,7 +11,7 @@ namespace backend.Services
         private readonly AppDbContext _db;
         private readonly FirebaseStorage _storage;
         private readonly int _maxPerProduct = 3;
-        private readonly long _maxBytes = 2 * 1024 * 1024; // 2MB
+        private readonly long _maxBytes = 5 * 1024 * 1024; // 5MB
 
         public ImageService(AppDbContext db, IConfiguration cfg, GoogleCredential gCred)
         {
@@ -37,7 +37,7 @@ namespace backend.Services
                 throw new InvalidOperationException("Max images reached");
 
             if (file.Length == 0) throw new InvalidOperationException("Empty file");
-            if (file.Length > _maxBytes) throw new InvalidOperationException("Too big (>2MB)");
+            if (file.Length > _maxBytes) throw new InvalidOperationException("Image too large. Maximum size is 5MB");
 
             var img = new Image
             {

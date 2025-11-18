@@ -161,7 +161,7 @@ namespace backend.Services
                 .ToListAsync();
         }
 
-        public async Task<List<PayoutQueue>> GetSellerPayoutsAsync(int sellerId)
+        public async Task<List<PayoutQueue>> GetSellerPayoutsAsync(Guid sellerId)
         {
             return await _context.PayoutQueue
                 .Include(p => p.Order)

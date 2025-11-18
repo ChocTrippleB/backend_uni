@@ -9,7 +9,7 @@ namespace backend.Model
     public class SellerRating
     {
         [Key]
-        public int SellerId { get; set; }
+        public Guid SellerId { get; set; }
         public User Seller { get; set; } = null!;
 
         [Required]

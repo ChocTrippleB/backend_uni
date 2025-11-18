@@ -2,6 +2,6 @@
 {
     public class FollowRequest
     {
-        public int FollowedId { get; set; }
+        public Guid FollowedId { get; set; }
     }
 }

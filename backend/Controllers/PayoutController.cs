@@ -1,3 +1,4 @@
+using backend.Helpers;
 using backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -95,13 +96,13 @@ namespace backend.Controllers
         {
             try
             {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int sellerId))
+                var sellerId = User.GetUserId();
+                if (sellerId == null)
                 {
                     return Unauthorized(new { message = "Invalid user authentication" });
                 }
 
-                var payouts = await _payoutService.GetSellerPayoutsAsync(sellerId);
+                var payouts = await _payoutService.GetSellerPayoutsAsync(sellerId.Value);
 
                 return Ok(new
                 {

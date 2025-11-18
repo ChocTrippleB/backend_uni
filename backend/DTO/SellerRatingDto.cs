@@ -2,7 +2,7 @@ namespace backend.DTO
 {
     public class SellerRatingDto
     {
-        public int SellerId { get; set; }
+        public Guid SellerId { get; set; }
         public decimal AverageRating { get; set; }
         public int TotalReviews { get; set; }
         public int TotalSales { get; set; }

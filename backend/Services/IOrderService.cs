@@ -8,7 +8,7 @@ namespace backend.Services
         /// <summary>
         /// Create a new order
         /// </summary>
-        Task<Order> CreateOrderAsync(int buyerId, CreateOrderDto dto);
+        Task<Order> CreateOrderAsync(Guid buyerId, CreateOrderDto dto);
 
         /// <summary>
         /// Get order by ID
@@ -18,12 +18,12 @@ namespace backend.Services
         /// <summary>
         /// Get all orders for a buyer
         /// </summary>
-        Task<List<OrderResponseDto>> GetBuyerOrdersAsync(int buyerId);
+        Task<List<OrderResponseDto>> GetBuyerOrdersAsync(Guid buyerId);
 
         /// <summary>
         /// Get all orders for a seller (only awaiting release orders)
         /// </summary>
-        Task<List<OrderResponseDto>> GetSellerOrdersAsync(int sellerId);
+        Task<List<OrderResponseDto>> GetSellerOrdersAsync(Guid sellerId);
 
         /// <summary>
         /// Update order payment reference
@@ -38,7 +38,7 @@ namespace backend.Services
         /// <summary>
         /// Verify release code and release funds to seller
         /// </summary>
-        Task<(bool success, string message)> VerifyReleaseCodeAsync(int sellerId, VerifyReleaseCodeDto dto);
+        Task<(bool success, string message)> VerifyReleaseCodeAsync(Guid sellerId, VerifyReleaseCodeDto dto);
 
         /// <summary>
         /// Generate a unique 6-digit release code

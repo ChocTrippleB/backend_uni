@@ -81,6 +81,7 @@ namespace backend
             // --- Dependency Injection for custom services ---
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IImageService, ImageService>();
+            builder.Services.AddScoped<ISlugService, SlugService>();  // NEW: Slug generation
             builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddScoped<ICartItemService, CartItemService>();
             builder.Services.AddScoped<IOrderService, OrderService>();

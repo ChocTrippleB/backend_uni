@@ -117,7 +117,10 @@ public class AuthController : ControllerBase
     [HttpGet("me")]
     public async Task<IActionResult> GetCurrentUser()
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+        var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+            return Unauthorized("Invalid user token");
+
 
         var user = await _context.Users
             .Include(u => u.Role)
@@ -149,7 +152,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("user/{id}")]
-    public async Task<IActionResult> GetUserById(int id)
+    public async Task<IActionResult> GetUserById(Guid id)
     {
         var user = await _context.Users
             .Include(u => u.Role)

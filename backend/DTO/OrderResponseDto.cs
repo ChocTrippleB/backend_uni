@@ -5,14 +5,15 @@ namespace backend.DTO
     public class OrderResponseDto
     {
         public int Id { get; set; }
-        public int BuyerId { get; set; }
+        public Guid BuyerId { get; set; }
         public string BuyerName { get; set; } = null!;
         public string? BuyerEmail { get; set; }
-        public int SellerId { get; set; }
+        public Guid SellerId { get; set; }
         public string SellerName { get; set; } = null!;
         public string? SellerEmail { get; set; }
         public int ProductId { get; set; }
         public string ProductName { get; set; } = null!;
+        public string? ProductSlug { get; set; }  // Product slug for shareable links
         public string? ProductImage { get; set; }
         public decimal Amount { get; set; }
         public string? PaymentReference { get; set; }

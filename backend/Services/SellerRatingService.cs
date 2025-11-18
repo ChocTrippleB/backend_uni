@@ -16,7 +16,7 @@ namespace backend.Services
             _logger = logger;
         }
 
-        public async Task RecalculateSellerRatingAsync(int sellerId)
+        public async Task RecalculateSellerRatingAsync(Guid sellerId)
         {
             try
             {
@@ -72,7 +72,7 @@ namespace backend.Services
             }
         }
 
-        public async Task<SellerRatingDto?> GetSellerRatingAsync(int sellerId)
+        public async Task<SellerRatingDto?> GetSellerRatingAsync(Guid sellerId)
         {
             try
             {

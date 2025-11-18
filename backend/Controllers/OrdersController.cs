@@ -1,4 +1,5 @@
 using backend.DTO;
+using backend.Helpers;
 using backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,13 +27,13 @@ namespace backend.Controllers
         {
             try
             {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int buyerId))
+                var buyerId = User.GetUserId();
+                if (buyerId == null)
                 {
                     return Unauthorized(new { message = "Invalid user authentication" });
                 }
 
-                var order = await _orderService.CreateOrderAsync(buyerId, dto);
+                var order = await _orderService.CreateOrderAsync(buyerId.Value, dto);
 
                 return Ok(new
                 {
@@ -60,13 +61,13 @@ namespace backend.Controllers
         {
             try
             {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int buyerId))
+                var buyerId = User.GetUserId();
+                if (buyerId == null)
                 {
                     return Unauthorized(new { message = "Invalid user authentication" });
                 }
 
-                var orders = await _orderService.GetBuyerOrdersAsync(buyerId);
+                var orders = await _orderService.GetBuyerOrdersAsync(buyerId.Value);
 
                 return Ok(new
                 {
@@ -89,13 +90,13 @@ namespace backend.Controllers
         {
             try
             {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int sellerId))
+                var sellerId = User.GetUserId();
+                if (sellerId == null)
                 {
                     return Unauthorized(new { message = "Invalid user authentication" });
                 }
 
-                var orders = await _orderService.GetSellerOrdersAsync(sellerId);
+                var orders = await _orderService.GetSellerOrdersAsync(sellerId.Value);
 
                 return Ok(new
                 {
@@ -118,13 +119,13 @@ namespace backend.Controllers
         {
             try
             {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int sellerId))
+                var sellerId = User.GetUserId();
+                if (sellerId == null)
                 {
                     return Unauthorized(new { message = "Invalid user authentication" });
                 }
 
-                var (success, message) = await _orderService.VerifyReleaseCodeAsync(sellerId, dto);
+                var (success, message) = await _orderService.VerifyReleaseCodeAsync(sellerId.Value, dto);
 
                 if (success)
                 {
@@ -177,8 +178,8 @@ namespace backend.Controllers
         {
             try
             {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                var userId = User.GetUserId();
+                if (userId == null)
                 {
                     return Unauthorized(new { message = "Invalid user authentication" });
                 }
@@ -191,7 +192,7 @@ namespace backend.Controllers
                 }
 
                 // Ensure user is either buyer or seller
-                if (order.BuyerId != userId && order.SellerId != userId)
+                if (order.BuyerId != userId.Value && order.SellerId != userId.Value)
                 {
                     return Forbid();
                 }

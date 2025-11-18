@@ -93,22 +93,24 @@ namespace backend.Controllers
         }
 
         [HttpGet("items/seller/{sellerId}")]
-        public async Task<IActionResult> GetItemsBySeller(int sellerId)
+        public async Task<IActionResult> GetItemsBySeller(Guid sellerId)
         {
             var items = await _productService.GetItemsBySellerAsync(sellerId);
             return Ok(items);
         }
 
-        [HttpGet("item/{id}")]
-        public async Task<IActionResult> GetItem(int id)
+        // NEW: Support slug or ID
+        [HttpGet("item/{identifier}")]
+        public async Task<IActionResult> GetItem(string identifier)
         {
-            var item = await _productService.GetByIdAsync(id);
+            var item = await _productService.GetBySlugOrIdAsync(identifier);
             if (item == null)
                 return NotFound("Product not found!");
 
             return Ok(new
             {
                 item.Id,
+                item.Slug,
                 item.Name,
                 item.Brand,
                 item.Description,
@@ -131,30 +133,45 @@ namespace backend.Controllers
         [HttpPost("items/add")]
         public async Task<IActionResult> CreateItem([FromForm] CreateItemDto dto)
         {
-            var product = new Product
+            try
             {
-                Name = dto.Name,
-                Description = dto.Description ?? string.Empty,
-                Price = dto.Price,
-                Condition = dto.Condition,
-                Brand = dto.Brand,
-                SellerId = dto.SellerId,
-                CategoryId = dto.CategoryId,
-                SubCategoryId = dto.SubCategoryId,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                Images = new List<Image>()
-            };
+                Console.WriteLine($"📦 Creating item: Name={dto.Name}, SellerId={dto.SellerId}, CategoryId={dto.CategoryId}, SubCategoryId={dto.SubCategoryId}");
 
-            await _productService.CreateAsync(product);
+                var product = new Product
+                {
+                    Name = dto.Name,
+                    Description = dto.Description ?? string.Empty,
+                    Price = dto.Price,
+                    Condition = dto.Condition,
+                    Brand = dto.Brand,
+                    SellerId = dto.SellerId,
+                    CategoryId = dto.CategoryId,
+                    SubCategoryId = dto.SubCategoryId,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    Images = new List<Image>()
+                };
 
-            if (dto.Images != null && dto.Images.Count > 0)
-            {
-                var uploaded = await _imageService.UploadManyAsync(dto.Images, product.Id);
-                product.Images = uploaded;
+                Console.WriteLine("💾 Saving product to database...");
+                await _productService.CreateAsync(product);
+                Console.WriteLine($"✅ Product created with ID: {product.Id}");
+
+                if (dto.Images != null && dto.Images.Count > 0)
+                {
+                    Console.WriteLine($"📸 Uploading {dto.Images.Count} images...");
+                    var uploaded = await _imageService.UploadManyAsync(dto.Images, product.Id);
+                    product.Images = uploaded;
+                    Console.WriteLine($"✅ Images uploaded successfully");
+                }
+
+                return CreatedAtAction(nameof(GetItem), new { identifier = product.Id }, product);
             }
-
-            return CreatedAtAction(nameof(GetItem), new { id = product.Id }, product);
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ ERROR creating item: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                return StatusCode(500, new { error = ex.Message, details = ex.InnerException?.Message });
+            }
         }
 
     }

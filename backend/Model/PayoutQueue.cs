@@ -16,7 +16,7 @@ namespace backend.Model
 
         // Seller info
         [Required]
-        public int SellerId { get; set; }
+        public Guid SellerId { get; set; }
         public User Seller { get; set; }
 
         [Required]

@@ -6,6 +6,7 @@ namespace backend.DTO
     {
         public int Id { get; set; }
         public string name { get; set; }
+        public string slug { get; set; }  // URL-friendly slug
         public string brand { get; set; }
         public decimal price { get; set; }
         public int inventory { get; set; }

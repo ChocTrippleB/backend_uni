@@ -4,7 +4,7 @@ namespace backend.Services
 {
     public interface ISellerRatingService
     {
-        Task RecalculateSellerRatingAsync(int sellerId);
-        Task<SellerRatingDto?> GetSellerRatingAsync(int sellerId);
+        Task RecalculateSellerRatingAsync(Guid sellerId);
+        Task<SellerRatingDto?> GetSellerRatingAsync(Guid sellerId);
     }
 }

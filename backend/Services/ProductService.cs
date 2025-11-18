@@ -9,15 +9,20 @@ namespace backend.Services
     {
         private readonly AppDbContext _db;
         private readonly IImageService _imageService;
+        private readonly ISlugService _slugService;
 
-        public ProductService(AppDbContext db, IImageService imageService)
+        public ProductService(AppDbContext db, IImageService imageService, ISlugService slugService)
         {
             _db = db;
             _imageService = imageService;
+            _slugService = slugService;
         }
 
         public async Task<Product> CreateAsync(Product product)
         {
+            // Generate unique slug from product name
+            product.Slug = await _slugService.GenerateUniqueSlugAsync(product.Name);
+
             _db.Products.Add(product);
             await _db.SaveChangesAsync();
             return product;
@@ -31,12 +36,39 @@ namespace backend.Services
                 .Include(p => p.Seller)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
-        
+        public async Task<Product?> GetBySlugAsync(string slug) =>
+            await _db.Products
+                .Include(p => p.Images)
+                .Include(p => p.Category)
+                .Include(p => p.SubCategory)
+                .Include(p => p.Seller)
+                .FirstOrDefaultAsync(p => p.Slug == slug);
+
+        public async Task<Product?> GetBySlugOrIdAsync(string identifier)
+        {
+            // Try to parse as int ID first for backward compatibility
+            if (int.TryParse(identifier, out var id))
+            {
+                var productById = await GetByIdAsync(id);
+                if (productById != null) return productById;
+            }
+
+            // Otherwise, treat as slug
+            return await GetBySlugAsync(identifier);
+        }
+
+
 
         public async Task<Product?> UpdateAsync(int id, UpdateProductDto updated)
         {
             var product = await _db.Products.FindAsync(id);
             if (product == null) return null;
+
+            // Regenerate slug if name changed
+            if (product.Name != updated.Name)
+            {
+                product.Slug = await _slugService.GenerateUniqueSlugAsync(updated.Name, id);
+            }
 
             product.Name = updated.Name;
             product.Description = updated.Description;
@@ -81,6 +113,7 @@ namespace backend.Services
                 .Select(p => new
                 {
                     p.Id,
+                    p.Slug,
                     p.Name,
                     p.Description,
                     p.Price,
@@ -133,6 +166,7 @@ namespace backend.Services
                 .Select(i => new
                 {
                     i.Id,
+                    i.Slug,
                     i.Name,
                     i.Description,
                     i.Price,
@@ -157,6 +191,7 @@ namespace backend.Services
                 .Select(i => new
                 {
                     i.Id,
+                    i.Slug,
                     i.Name,
                     i.Description,
                     i.Price,
@@ -184,6 +219,7 @@ namespace backend.Services
                 {
                     type = "product",
                     id = p.Id,
+                    slug = p.Slug,
                     name = p.Name,
                     imageUrl = p.Images.FirstOrDefault() != null ? p.Images.FirstOrDefault().downloadUrl : null,
                     category = p.SubCategory.Category.Name,
@@ -202,6 +238,7 @@ namespace backend.Services
                 {
                     type = "user",
                     id = u.Id,
+                    username = u.Username,
                     name = u.Username,
                     fullName = u.FullName,
                     imageUrl = u.ProfilePictureUrl,
@@ -219,7 +256,7 @@ namespace backend.Services
             return combined;
         }
 
-        public async Task<List<object>> GetItemsBySellerAsync(int sellerId)
+        public async Task<List<object>> GetItemsBySellerAsync(Guid sellerId)
         {
             return await _db.Products
                 .Include(i => i.Images)
@@ -229,6 +266,7 @@ namespace backend.Services
                 .Select(i => new
                 {
                     i.Id,
+                    i.Slug,
                     i.Name,
                     i.Description,
                     i.Price,
