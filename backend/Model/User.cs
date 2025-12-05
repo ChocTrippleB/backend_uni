@@ -31,6 +31,10 @@ namespace backend.Model
         public bool EmailConfirmed { get; set; } = false;
         public string? EmailConfirmationToken { get; set; }
 
+        // ✅ Password Reset Fields
+        public string? PasswordResetToken { get; set; }
+        public DateTime? PasswordResetTokenExpiry { get; set; }
+
         public int RoleId { get; set; }
         public Role Role { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

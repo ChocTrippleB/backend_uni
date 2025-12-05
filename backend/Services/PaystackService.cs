@@ -30,19 +30,27 @@ namespace backend.Services
         public async Task<PaystackInitializeResponse?> InitializePaymentAsync(
             string email,
             decimal amount,
-            string reference)
+            string reference,
+            Dictionary<string, object>? metadata = null,
+            string? callbackUrl = null)
         {
             try
             {
                 // Paystack accepts amount in kobo (pesewa/cents), so multiply by 100
-                var requestBody = new
+                var requestBody = new Dictionary<string, object>
                 {
-                    email,
-                    amount = (int)(amount * 100), // Convert to kobo
-                    reference,
-                    currency = "ZAR", // South African Rand
-                    callback_url = _callbackUrl
+                    { "email", email },
+                    { "amount", (int)(amount * 100) }, // Convert to kobo
+                    { "reference", reference },
+                    { "currency", "ZAR" }, // South African Rand
+                    { "callback_url", callbackUrl ?? _callbackUrl }
                 };
+
+                // Add metadata if provided
+                if (metadata != null && metadata.Count > 0)
+                {
+                    requestBody.Add("metadata", metadata);
+                }
 
                 var json = JsonSerializer.Serialize(requestBody);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");

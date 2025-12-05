@@ -7,7 +7,7 @@ namespace backend.Services
         /// <summary>
         /// Initialize a payment transaction with Paystack
         /// </summary>
-        Task<PaystackInitializeResponse?> InitializePaymentAsync(string email, decimal amount, string reference);
+        Task<PaystackInitializeResponse?> InitializePaymentAsync(string email, decimal amount, string reference, Dictionary<string, object>? metadata = null, string? callbackUrl = null);
 
         /// <summary>
         /// Verify a payment transaction with Paystack

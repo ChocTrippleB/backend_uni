@@ -12,6 +12,8 @@ namespace backend.Model
         [Required]
         public string downloadUrl { get; set; } = string.Empty; // Firebase public URL
 
+        public int DisplayOrder { get; set; } = 0; // Order for displaying images (0 = cover image)
+
         public int productId { get; set; }
 
         [JsonIgnore]

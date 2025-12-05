@@ -117,7 +117,8 @@ namespace backend.Controllers
                 item.Price,
                 item.Condition,
                 item.SellerId,
-                Images = item.Images.Select(img => new { img.downloadUrl }).ToList(),
+                item.IsSold, // Add sold status for product detail page
+                Images = item.Images.Select(img => new { img.Id, img.downloadUrl }).ToList(),
                 Category = item.Category.Name,
                 SubCategory = item.SubCategory.Name,
                 Seller = item.Seller != null ? new

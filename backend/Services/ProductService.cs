@@ -28,21 +28,47 @@ namespace backend.Services
             return product;
         }
 
-        public async Task<Product?> GetByIdAsync(int id) =>
-            await _db.Products
-                .Include(p => p.Images)
+        public async Task<Product?> GetByIdAsync(int id)
+        {
+            var product = await _db.Products
                 .Include(p => p.Category)
                 .Include(p => p.SubCategory)
                 .Include(p => p.Seller)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
-        public async Task<Product?> GetBySlugAsync(string slug) =>
-            await _db.Products
-                .Include(p => p.Images)
+            if (product != null)
+            {
+                // Load images ordered by DisplayOrder
+                await _db.Entry(product)
+                    .Collection(p => p.Images)
+                    .Query()
+                    .OrderBy(i => i.DisplayOrder)
+                    .LoadAsync();
+            }
+
+            return product;
+        }
+
+        public async Task<Product?> GetBySlugAsync(string slug)
+        {
+            var product = await _db.Products
                 .Include(p => p.Category)
                 .Include(p => p.SubCategory)
                 .Include(p => p.Seller)
                 .FirstOrDefaultAsync(p => p.Slug == slug);
+
+            if (product != null)
+            {
+                // Load images ordered by DisplayOrder
+                await _db.Entry(product)
+                    .Collection(p => p.Images)
+                    .Query()
+                    .OrderBy(i => i.DisplayOrder)
+                    .LoadAsync();
+            }
+
+            return product;
+        }
 
         public async Task<Product?> GetBySlugOrIdAsync(string identifier)
         {
@@ -137,6 +163,7 @@ namespace backend.Services
             var query = _db.Products
                 .Include(i => i.Images)
                 .Include(i => i.SubCategory).ThenInclude(sc => sc.Category)
+                .Where(i => !i.IsDeleted && !i.IsSold) // Exclude deleted and sold items from shop
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
@@ -186,6 +213,7 @@ namespace backend.Services
             return await _db.Products
                 .Include(i => i.Images)
                 .Include(i => i.SubCategory).ThenInclude(sc => sc.Category)
+                .Where(i => !i.IsDeleted && !i.IsSold) // Exclude deleted and sold items from home page
                 .OrderByDescending(i => i.CreatedAt)
                 .Take(count)
                 .Select(i => new
@@ -259,7 +287,7 @@ namespace backend.Services
         public async Task<List<object>> GetItemsBySellerAsync(Guid sellerId)
         {
             return await _db.Products
-                .Include(i => i.Images)
+                .Include(i => i.Images.OrderBy(img => img.DisplayOrder))
                 .Include(i => i.SubCategory).ThenInclude(sc => sc.Category)
                 .Where(i => !i.IsDeleted && i.SellerId == sellerId)
                 .OrderByDescending(i => i.CreatedAt)
@@ -273,7 +301,8 @@ namespace backend.Services
                     i.Brand,
                     i.Condition,
                     i.SellerId,
-                    Images = i.Images.Select(img => new { img.downloadUrl }).ToList(),
+                    i.IsSold, // Add sold status for profile page
+                    Images = i.Images.OrderBy(img => img.DisplayOrder).Select(img => new { img.Id, img.downloadUrl }).ToList(),
                     Category = i.SubCategory.Category.Name,
                     SubCategory = i.SubCategory.Name
                 })

@@ -51,7 +51,8 @@ namespace backend
                             new Uri(origin).Host.StartsWith("192.") ||
                             new Uri(origin).Host.StartsWith("127.") ||
                             new Uri(origin).Host.StartsWith("10.") ||
-                            new Uri(origin).Host.StartsWith("172."))
+                            new Uri(origin).Host.StartsWith("172.") ||
+                            new Uri(origin).Host.StartsWith("twana-inerrant-kiera.ngrok-free."))
                         .AllowAnyMethod()
                         .AllowAnyHeader();
                     });
@@ -87,6 +88,7 @@ namespace backend
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IPayoutService, PayoutService>();
             builder.Services.AddScoped<IBankAccountService, BankAccountService>();
+            builder.Services.AddScoped<IWalletService, WalletService>();
             builder.Services.AddScoped<IReviewService, ReviewService>();
             builder.Services.AddScoped<ISellerRatingService, SellerRatingService>();
             builder.Services.AddHttpClient<IPaystackService, PaystackService>();

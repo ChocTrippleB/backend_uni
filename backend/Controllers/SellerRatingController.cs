@@ -60,10 +60,10 @@ namespace backend.Controllers
         }
 
         /// <summary>
-        /// Manually recalculate seller rating (Admin only - optional)
+        /// Manually recalculate seller rating
         /// </summary>
         [HttpPost("{sellerId}/recalculate")]
-        [Authorize(Roles = "Admin")]
+        [AllowAnonymous]
         public async Task<IActionResult> RecalculateRating(Guid sellerId)
         {
             try

@@ -165,6 +165,38 @@ namespace backend.Controllers
             return NoContent();
         }
 
+        // ---------- Set as Cover Image ----------
+        [HttpPatch("{id:int}/set-cover")]
+        public async Task<IActionResult> SetAsCover(int id)
+        {
+            var img = await _db.Images.FindAsync(id);
+            if (img == null) return NotFound();
+
+            // Get all images for this product
+            var productImages = await _db.Images
+                .Where(i => i.productId == img.productId)
+                .ToListAsync();
+
+            // Set the selected image to DisplayOrder = 0 (cover)
+            // Set all other images to DisplayOrder > 0
+            foreach (var image in productImages)
+            {
+                if (image.Id == id)
+                {
+                    image.DisplayOrder = 0;
+                }
+                else if (image.DisplayOrder == 0)
+                {
+                    // Push the previous cover image down
+                    image.DisplayOrder = 1;
+                }
+            }
+
+            await _db.SaveChangesAsync();
+
+            return Ok(new { message = "Cover image updated successfully" });
+        }
+
         // Try to infer file extension from Firebase download URL if original name lacked it
         private static string? ParseExtFromFirebaseUrl(string url)
         {

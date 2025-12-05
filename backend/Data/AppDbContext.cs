@@ -26,6 +26,12 @@ namespace backend.Data
         public DbSet<BankAccount> BankAccounts { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<SellerRating> SellerRatings { get; set; }
+        public DbSet<Address> Addresses { get; set; }
+
+        // Wallet System
+        public DbSet<Wallet> Wallets { get; set; }
+        public DbSet<WalletTransaction> WalletTransactions { get; set; }
+        public DbSet<VoucherRedemption> VoucherRedemptions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -182,6 +188,81 @@ namespace backend.Data
                 .WithMany()
                 .HasForeignKey(sr => sr.SellerId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure Address relationships
+            modelBuilder.Entity<Address>()
+                .HasOne(a => a.User)
+                .WithMany()
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Add index for querying user's addresses
+            modelBuilder.Entity<Address>()
+                .HasIndex(a => new { a.UserId, a.IsDefault });
+
+            // Configure Wallet relationships (One-to-One: User-Wallet)
+            modelBuilder.Entity<Wallet>()
+                .HasOne(w => w.User)
+                .WithMany()
+                .HasForeignKey(w => w.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Unique constraint: One wallet per user
+            modelBuilder.Entity<Wallet>()
+                .HasIndex(w => w.UserId)
+                .IsUnique();
+
+            // Configure WalletTransaction relationships
+            modelBuilder.Entity<WalletTransaction>()
+                .HasOne(wt => wt.Wallet)
+                .WithMany(w => w.Transactions)
+                .HasForeignKey(wt => wt.WalletId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<WalletTransaction>()
+                .HasOne(wt => wt.Order)
+                .WithMany()
+                .HasForeignKey(wt => wt.OrderId)
+                .OnDelete(DeleteBehavior.SetNull); // Keep transaction history even if order is deleted
+
+            // Indexes for WalletTransaction queries
+            modelBuilder.Entity<WalletTransaction>()
+                .HasIndex(wt => wt.WalletId);
+
+            modelBuilder.Entity<WalletTransaction>()
+                .HasIndex(wt => wt.CreatedAt);
+
+            modelBuilder.Entity<WalletTransaction>()
+                .HasIndex(wt => wt.Reference)
+                .IsUnique();
+
+            // Configure VoucherRedemption relationships
+            modelBuilder.Entity<VoucherRedemption>()
+                .HasOne(vr => vr.User)
+                .WithMany()
+                .HasForeignKey(vr => vr.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<VoucherRedemption>()
+                .HasOne(vr => vr.Transaction)
+                .WithMany()
+                .HasForeignKey(vr => vr.TransactionId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Unique constraint: Prevent duplicate voucher redemptions
+            modelBuilder.Entity<VoucherRedemption>()
+                .HasIndex(vr => vr.VoucherHashedPin)
+                .IsUnique();
+
+            // Indexes for fraud detection and queries
+            modelBuilder.Entity<VoucherRedemption>()
+                .HasIndex(vr => vr.UserId);
+
+            modelBuilder.Entity<VoucherRedemption>()
+                .HasIndex(vr => vr.RedeemedAt);
+
+            modelBuilder.Entity<VoucherRedemption>()
+                .HasIndex(vr => vr.IsSuspicious);
         }
     }
 }

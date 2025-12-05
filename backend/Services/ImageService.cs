@@ -39,12 +39,19 @@ namespace backend.Services
             if (file.Length == 0) throw new InvalidOperationException("Empty file");
             if (file.Length > _maxBytes) throw new InvalidOperationException("Image too large. Maximum size is 5MB");
 
+            // Get the max DisplayOrder for this product
+            var maxDisplayOrder = await _db.Images
+                .Where(i => i.productId == productId)
+                .Select(i => (int?)i.DisplayOrder)
+                .MaxAsync() ?? -1;
+
             var img = new Image
             {
                 fileName = file.FileName,
                 fileType = file.ContentType,
                 productId = productId,
-                downloadUrl = "pending"
+                downloadUrl = "pending",
+                DisplayOrder = maxDisplayOrder + 1
             };
 
             _db.Images.Add(img);

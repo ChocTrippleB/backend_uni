@@ -27,9 +27,10 @@ namespace backend.Services
                     .Where(r => r.SellerId == sellerId)
                     .ToListAsync();
 
-                // Get total completed sales
+                // Get total completed sales (includes AwaitingPayout since sale is complete, just waiting for payout batch)
                 var totalSales = await _context.Orders
-                    .Where(o => o.SellerId == sellerId && o.Status == OrderStatus.Completed)
+                    .Where(o => o.SellerId == sellerId &&
+                           (o.Status == OrderStatus.AwaitingPayout || o.Status == OrderStatus.Completed))
                     .CountAsync();
 
                 // Find or create seller rating record
