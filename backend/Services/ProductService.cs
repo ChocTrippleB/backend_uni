@@ -154,7 +154,7 @@ namespace backend.Services
 
 
         public async Task<(int totalItems, List<object> items)> GetItemsAsync(
-        string? search, string? category, string? condition,
+        string? search, string? category, string? condition, string? brand,
         string? sort, int page, int pageSize)
         {
             if (page <= 0) page = 1;
@@ -177,6 +177,9 @@ namespace backend.Services
 
             if (!string.IsNullOrWhiteSpace(condition))
                 query = query.Where(i => i.Condition == condition);
+
+            if (!string.IsNullOrWhiteSpace(brand))
+                query = query.Where(i => i.Brand.ToLower() == brand.ToLower());
 
             query = sort switch
             {

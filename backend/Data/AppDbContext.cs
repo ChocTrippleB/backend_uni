@@ -50,31 +50,65 @@ namespace backend.Data
                 new Category { Id = 2, Name = "Books" },
                 new Category { Id = 3, Name = "Clothing" },
                 new Category { Id = 4, Name = "Furniture" },
-                new Category { Id = 5, Name = "Appliances" }
+                new Category { Id = 5, Name = "Appliances" },
+                new Category { Id = 6, Name = "Fashion" },
+                new Category { Id = 7, Name = "Accessories" },
+                new Category { Id = 8, Name = "Audio" },
+                new Category { Id = 9, Name = "Mobile" },
+                new Category { Id = 10, Name = "Lifestyle" }
             );
 
             // Seed SubCategories
             modelBuilder.Entity<SubCategory>().HasData(
                 // Electronics
                 new SubCategory { Id = 1, Name = "Laptops", CategoryId = 1 },
-                new SubCategory { Id = 2, Name = "Phones", CategoryId = 1 },
-                new SubCategory { Id = 3, Name = "Accessories", CategoryId = 1 },
+                new SubCategory { Id = 2, Name = "Tablets", CategoryId = 1 },
+                new SubCategory { Id = 3, Name = "Gaming", CategoryId = 1 },
 
                 // Books
                 new SubCategory { Id = 4, Name = "Textbooks", CategoryId = 2 },
                 new SubCategory { Id = 5, Name = "Novels", CategoryId = 2 },
 
                 // Clothing
-                new SubCategory { Id = 6, Name = "Men's", CategoryId = 3 },
-                new SubCategory { Id = 7, Name = "Women's", CategoryId = 3 },
+                new SubCategory { Id = 6, Name = "Men's Clothes", CategoryId = 3 },
+                new SubCategory { Id = 7, Name = "Women's Clothes", CategoryId = 3 },
+                new SubCategory { Id = 8, Name = "Men's Shoes", CategoryId = 3 },
+                new SubCategory { Id = 9, Name = "Women's Shoes", CategoryId = 3 },
 
                 // Furniture
-                new SubCategory { Id = 8, Name = "Desks", CategoryId = 4 },
-                new SubCategory { Id = 9, Name = "Chairs", CategoryId = 4 },
+                new SubCategory { Id = 10, Name = "Desks", CategoryId = 4 },
+                new SubCategory { Id = 11, Name = "Chairs", CategoryId = 4 },
+                new SubCategory { Id = 12, Name = "Storage", CategoryId = 4 },
 
                 // Appliances
-                new SubCategory { Id = 10, Name = "Kitchen", CategoryId = 5 },
-                new SubCategory { Id = 11, Name = "Cleaning", CategoryId = 5 }
+                new SubCategory { Id = 13, Name = "Kitchen", CategoryId = 5 },
+                new SubCategory { Id = 14, Name = "Cleaning", CategoryId = 5 },
+                new SubCategory { Id = 15, Name = "Laundry", CategoryId = 5 },
+
+                // Fashion
+                new SubCategory { Id = 16, Name = "Watches", CategoryId = 6 },
+                new SubCategory { Id = 17, Name = "Bags", CategoryId = 6 },
+                new SubCategory { Id = 18, Name = "Sunglasses", CategoryId = 6 },
+
+                // Accessories
+                new SubCategory { Id = 19, Name = "Phone Accessories", CategoryId = 7 },
+                new SubCategory { Id = 20, Name = "Laptop Accessories", CategoryId = 7 },
+                new SubCategory { Id = 21, Name = "General Accessories", CategoryId = 7 },
+
+                // Audio
+                new SubCategory { Id = 22, Name = "Headphones", CategoryId = 8 },
+                new SubCategory { Id = 23, Name = "Speakers", CategoryId = 8 },
+                new SubCategory { Id = 24, Name = "Earbuds", CategoryId = 8 },
+
+                // Mobile
+                new SubCategory { Id = 25, Name = "Smartphones", CategoryId = 9 },
+                new SubCategory { Id = 26, Name = "Feature Phones", CategoryId = 9 },
+                new SubCategory { Id = 27, Name = "Smart Watches", CategoryId = 9 },
+
+                // Lifestyle
+                new SubCategory { Id = 28, Name = "Sports & Fitness", CategoryId = 10 },
+                new SubCategory { Id = 29, Name = "Beauty & Health", CategoryId = 10 },
+                new SubCategory { Id = 30, Name = "Home Decor", CategoryId = 10 }
             );
 
             modelBuilder.Entity<UserFollower>()

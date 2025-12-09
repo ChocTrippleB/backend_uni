@@ -38,6 +38,34 @@ namespace backend.Controllers
             return Ok(subcategories);
         }
 
+        [HttpGet("brands")]
+        public async Task<IActionResult> GetBrands()
+        {
+            var brands = await _context.Products
+                .Where(p => !p.IsDeleted && !string.IsNullOrWhiteSpace(p.Brand))
+                .Select(p => p.Brand)
+                .Distinct()
+                .OrderBy(b => b)
+                .ToListAsync();
+
+            return Ok(brands);
+        }
+
+        [HttpGet("categories-with-subcategories")]
+        public async Task<IActionResult> GetCategoriesWithSubcategories()
+        {
+            var categories = await _context.Categories
+                .Include(c => c.SubCategories)
+                .Select(c => new
+                {
+                    c.Id,
+                    c.Name,
+                    SubCategories = c.SubCategories.Select(sc => new { sc.Id, sc.Name }).ToList()
+                })
+                .ToListAsync();
+
+            return Ok(categories);
+        }
 
     }
 }

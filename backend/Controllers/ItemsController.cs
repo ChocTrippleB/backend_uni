@@ -26,11 +26,12 @@ namespace backend.Controllers
             [FromQuery] string? search,
             [FromQuery] string? category,
             [FromQuery] string? condition,
+            [FromQuery] string? brand,
             [FromQuery] string? sort = null,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
         {
-            var (totalItems, items) = await _productService.GetItemsAsync(search, category, condition, sort, page, pageSize);
+            var (totalItems, items) = await _productService.GetItemsAsync(search, category, condition, brand, sort, page, pageSize);
 
             return Ok(new { totalItems, page, pageSize, items });
         }
